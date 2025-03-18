@@ -24,11 +24,10 @@ const Feedback = () => {
               <div className="max-w-6xl mx-auto">
                 <div className="mb-8">
                   <h2 className="text-2xl text-left font-bold mb-2 px-3">
-                    Feedback...  <Link to="/review" className="bg-teal-400 hover:bg-teal-600 text-white text-sm px-5 py-2 rounded-xl">add feedback</Link>
-                  </h2>
-                  <p className="text-gray-600 text-left px-5">What our users are saying</p>
+                    Feedback...</h2>
+                  <p className="text-gray-600 text-left px-5 py-8">What our users are saying  <Link to="/review" className="bg-teal-400 hover:bg-teal-600 text-white text-sm px-5 py-2 rounded-xl">add feedback</Link></p>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-4 md:p-8 lg:p-16">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-4 md:p-8 lg:p-8">
                   {reviews.map((review) => (
                     <Card key={review.id}>
                       <CardContent>

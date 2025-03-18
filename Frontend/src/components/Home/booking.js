@@ -16,11 +16,10 @@ const Booking = () => {
         <div className="max-w-6xl mx-auto md:grid-cols-2 gap-10 items-center w-[95%] h-[90%] rounded-lg bg-gradient-to-r from-teal-100 to-teal-50 p-12">
           <div className="max-w-6xl mx-auto">
             <div className="mb-8 px-5 gap-6">
-              <h2 className="text-2xl text-left font-bold items-center">Booking Service  <Button className="bg-teal-400 hover:bg-teal-600 text-sm text-white">Booking ----</Button>
-              </h2>
-              <p className="text-gray-600 text-left px-2">Choose from our popular service categories</p>
+              <h2 className="text-2xl text-left font-bold items-center">Booking Service</h2>
+              <p className="text-gray-600 text-left px-2 py-8">Choose from our popular service categories  <Button className="bg-teal-400 hover:bg-teal-600 text-sm text-white">Booking ----</Button></p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-16">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-8">
               <Card className="overflow-hidden hover:shadow-lg transition-shadow">
                 <img 
                   src={image1} 

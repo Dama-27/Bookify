@@ -10,6 +10,9 @@ import Review from "./app/Home/review";
 import Community from "./app/Home/community";
 import Service from "./app/Home/service";
 import Contact from "./app/Home/contact";
+import BookifyDashboard from './components/ui/BookifyDashboard';
+import FristPage from "./app/account/serviceProvider/fristPage"
+import ClientBookingPage from "./app/account/client/clientBookingPage";
 
 import "./App.css";
 
@@ -28,6 +31,9 @@ function App() {
           <Route path="/community" element={<Community />} />
           <Route path="/service" element={<Service />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/bookifydashboard" element={<BookifyDashboard />} />
+          <Route path="/firstpage" element={<FristPage />} />
+          <Route path="/clientbookingpage" element={<ClientBookingPage />} />
           
         </Routes>
       </div>

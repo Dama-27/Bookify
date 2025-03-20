@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
-import Button from "../ui/button";
 import "../../styles/Home.css";
 import image1 from '../../images/1ae6e703-2e7a-4be5-9ca1-13a2cdd82738.png';
 import image2 from '../../images/14ac423b-f383-4ab5-b624-4fb57e99b7ef.webp';
 import image3 from '../../images/622e4649-090b-4f8f-bee7-9c607d3f8732.webp';
+import { Link } from "react-router-dom";
 
 
 const Slider = () => {
@@ -138,12 +138,12 @@ const Slider = () => {
               Streamline your appointments, maximize efficiency, and enhance client satisfaction with our intuitive booking platform.
             </p>
             <div className="space-x-4 items-center justify-start">
-              <Button className="bg-blue-500 hover:bg-blue-600 text-white text-center">
+              <Link to="/signupcommon" className="bg-blue-500 hover:bg-blue-600 text-white text-center p-4 rounded-3xl">
                 Get Started
-              </Button>
-              <Button className="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 text-center">
+              </Link>
+              <Link to="/about" className="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 text-center p-4 rounded-3xl">
                 Learn More
-              </Button>
+              </Link>
             </div>
           </div>
         </div>

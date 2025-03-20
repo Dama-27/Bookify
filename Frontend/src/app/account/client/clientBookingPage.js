@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const ClientBookingPage = ({ serviceData, onBack }) => {
+const ClientBookingPage = ({ serviceData}) => {
   // Add default value for serviceData
   const data = serviceData || {
     workingDays: {},
@@ -115,10 +115,10 @@ const ClientBookingPage = ({ serviceData, onBack }) => {
           <div
             key={cloneDay.toString()}
             className={`p-2 border text-center cursor-pointer ${
-              isToday ? 'bg-blue-100' : ''
-            } ${isCurrentMonth ? '' : 'text-gray-300'} ${
+              isToday ? 'bg-blue-500' : ''
+            } ${isCurrentMonth ? '' : 'text-gray-400'} ${
               isSelected ? 'bg-blue-500 text-white' : ''
-            } ${isAvailable ? 'hover:bg-blue-50' : 'opacity-50 cursor-not-allowed'}`}
+            } ${isAvailable ? 'hover:bg-blue-400' : 'opacity-50 cursor-not-allowed'}`}
             onClick={() => isAvailable && setSelectedDate(cloneDay)}
           >
             {cloneDay.getDate()}
@@ -139,22 +139,22 @@ const ClientBookingPage = ({ serviceData, onBack }) => {
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">{monthName} {currentMonth.getFullYear()}</h2>
           <div className="flex gap-2">
-            <button onClick={prevMonth} className="p-2 bg-gray-100 rounded hover:bg-gray-200">
+            <button onClick={prevMonth} className="p-2 bg-gray-200 rounded hover:bg-gray-500">
               &lt;
             </button>
-            <button onClick={nextMonth} className="p-2 bg-gray-100 rounded hover:bg-gray-200">
+            <button onClick={nextMonth} className="p-2 bg-gray-100 rounded hover:bg-gray-500">
               &gt;
             </button>
           </div>
         </div>
-        <div className="grid grid-cols-7 gap-px bg-gray-200">
+        <div className="grid grid-cols-7 gap-px bg-black">
           {daysOfWeek.map(day => (
-            <div key={day} className="bg-gray-100 text-center py-1 font-medium">
+            <div key={day} className="bg-cyan-200 text-center py-1 font-medium">
               {day}
             </div>
           ))}
         </div>
-        <div className="bg-gray-200 gap-px">
+        <div className="bg-cyan-300 gap-px">
           {rows}
         </div>
       </div>
@@ -195,88 +195,90 @@ const ClientBookingPage = ({ serviceData, onBack }) => {
   };
 
   return (
-    <div className="container mx-auto p-4">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Client Booking Information</h1>
-      </div>
+    <div className="container mx-auto px-60 py-8">
+        <div className="container mx-auto px-10 py-8 bg-gradient-to-br from-cyan-100 via-blue-100 to-indigo-100">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold">Client Booking Information</h1>
+        </div>
 
-      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <h2 className="text-xl font-semibold mb-4">Provider Information</h2>
-            <div className="space-y-2">
-              <p><span className="font-medium">Provider Name:</span> {data.providerName || 'Not specified'}</p>
-              <p><span className="font-medium">Specialty:</span> {data.specialty || 'Not specified'}</p>
-              <p><span className="font-medium">Qualification:</span> {data.qualification || 'Not specified'}</p>
-              <p><span className="font-medium">Workplace:</span> {data.workplace || 'Not specified'}</p>
-              <p><span className="font-medium">Contact Number:</span> {data.contactNumber || 'Not specified'}</p>
+        <div className="rounded-lg shadow-md p-6 mb-6 bg-gradient-to-br from-cyan-200 via-blue-200 to-indigo-200">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <h2 className="text-xl font-semibold mb-4">Provider Information</h2>
+              <div className="space-y-2">
+                <p><span className="font-medium">Provider Name:</span> {data.providerName || 'Not specified'}</p>
+                <p><span className="font-medium">Specialty:</span> {data.specialty || 'Not specified'}</p>
+                <p><span className="font-medium">Qualification:</span> {data.qualification || 'Not specified'}</p>
+                <p><span className="font-medium">Workplace:</span> {data.workplace || 'Not specified'}</p>
+                <p><span className="font-medium">Contact Number:</span> {data.contactNumber || 'Not specified'}</p>
+              </div>
+            </div>
+            
+            <div>
+              <h2 className="text-xl font-semibold mb-4">Location Information</h2>
+              <div className="space-y-2">
+                <p><span className="font-medium">Clinic/Location:</span> {data.address.clinic || 'Not specified'}</p>
+                <p><span className="font-medium">District:</span> {data.address.district || 'Not specified'}</p>
+                <p><span className="font-medium">County/City:</span> {data.address.county || 'Not specified'}</p>
+              </div>
             </div>
           </div>
           
-          <div>
-            <h2 className="text-xl font-semibold mb-4">Location Information</h2>
-            <div className="space-y-2">
-              <p><span className="font-medium">Clinic/Location:</span> {data.address.clinic || 'Not specified'}</p>
-              <p><span className="font-medium">District:</span> {data.address.district || 'Not specified'}</p>
-              <p><span className="font-medium">County/City:</span> {data.address.county || 'Not specified'}</p>
+          <div className="rounded-lg shadow-md p-6 mb-6">
+            <h2 className="text-xl font-semibold mb-4">Available Days</h2>
+            <div className="flex flex-wrap gap-2">
+              {Object.keys(data.workingDays).map((day) => (
+                <div 
+                  key={day}
+                  className={`py-2 px-4 rounded-md ${
+                    data.workingDays[day] 
+                      ? 'bg-blue-100 text-blue-800 border border-blue-300' 
+                      : 'bg-cyan-50 text-gray-600'
+                  }`}
+                >
+                  {day.charAt(0).toUpperCase() + day.slice(1)}
+                </div>
+              ))}
             </div>
           </div>
+          
+          <div className="rounded-lg shadow-md p-6 mb-6">
+            <h2 className="text-xl font-semibold mb-4">Working Hours</h2>
+            <p className="bg-cyan-100 p-3 rounded-md inline-block">
+              {data.workHours?.start || '09:00'} - {data.workHours?.end || '17:00'}
+            </p>
+          </div>
         </div>
         
-        <div className="mt-8">
-          <h2 className="text-xl font-semibold mb-4">Available Days</h2>
-          <div className="flex flex-wrap gap-2">
-            {Object.keys(data.workingDays).map((day) => (
-              <div 
-                key={day}
-                className={`py-2 px-4 rounded-md ${
-                  data.workingDays[day] 
-                    ? 'bg-blue-100 text-blue-800 border border-blue-300' 
-                    : 'bg-gray-100 text-gray-400'
-                }`}
+        <div className="rounded-lg shadow-md p-6 mb-6 bg-gradient-to-br from-cyan-200 via-blue-200 to-indigo-200">
+          <h2 className="text-xl font-semibold mb-4">Book an Appointment</h2>
+          <p className="mb-4">Please select a date and time slot for your appointment:</p>
+          
+          {renderCalendar()}
+          {renderTimeSlots()}
+          
+          {selectedTimeSlot && (
+            <div className="mt-6">
+              <button 
+                className="w-full bg-blue-500 text-white py-3 rounded-md hover:bg-blue-600 transition"
               >
-                {day.charAt(0).toUpperCase() + day.slice(1)}
-              </div>
-            ))}
-          </div>
+                Book Appointment for {selectedDate?.toDateString()} at {selectedTimeSlot.time}
+              </button>
+            </div>
+          )}
         </div>
         
-        <div className="mt-8">
-          <h2 className="text-xl font-semibold mb-4">Working Hours</h2>
-          <p className="bg-blue-50 p-3 rounded-md inline-block">
-            {data.workHours?.start || '09:00'} - {data.workHours?.end || '17:00'}
-          </p>
-        </div>
-      </div>
-      
-      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-        <h2 className="text-xl font-semibold mb-4">Book an Appointment</h2>
-        <p className="mb-4">Please select a date and time slot for your appointment:</p>
-        
-        {renderCalendar()}
-        {renderTimeSlots()}
-        
-        {selectedTimeSlot && (
-          <div className="mt-6">
-            <button 
-              className="w-full bg-blue-500 text-white py-3 rounded-md hover:bg-blue-600 transition"
-            >
-              Book Appointment for {selectedDate?.toDateString()} at {selectedTimeSlot.time}
-            </button>
+        <div className="rounded-lg shadow-md p-6 mb-6 bg-gradient-to-br from-cyan-200 via-blue-200 to-indigo-200">
+          <h2 className="text-xl font-semibold mb-4">Client Booking Instructions</h2>
+          <div className="bg-cyan-100 p-4 rounded-md">
+            <ol className="list-decimal list-inside space-y-2">
+              <li>Select an available date in the calendar (highlighted dates)</li>
+              <li>Choose a time slot from the available options</li>
+              <li>Click the "Book Appointment" button to confirm your selection</li>
+              <li>Provide your personal details when prompted</li>
+              <li>Wait for confirmation from the provider</li>
+            </ol>
           </div>
-        )}
-      </div>
-      
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-xl font-semibold mb-4">Client Booking Instructions</h2>
-        <div className="bg-gray-50 p-4 rounded-md">
-          <ol className="list-decimal list-inside space-y-2">
-            <li>Select an available date in the calendar (highlighted dates)</li>
-            <li>Choose a time slot from the available options</li>
-            <li>Click the "Book Appointment" button to confirm your selection</li>
-            <li>Provide your personal details when prompted</li>
-            <li>Wait for confirmation from the provider</li>
-          </ol>
         </div>
       </div>
     </div>

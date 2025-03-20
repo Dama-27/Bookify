@@ -2,6 +2,7 @@ import React from 'react';
 import image1 from '../../images/Ellipse 1.png';
 import image2 from '../../images/Ellipse 137.png';
 import image3 from '../../images/Ellipse 138.png';
+import { Link } from 'react-router-dom';
 const CommonCategoryView = () => {
   const commonProviders = [
     {
@@ -14,31 +15,31 @@ const CommonCategoryView = () => {
       id: 2,
       name: 'Sarah Wilson',
       service: 'Customer Support',
-      image: '/path/to/common2.jpg'
+      image: image2
     },
     {
       id: 3,
       name: 'David Lee',
       service: 'Consultation',
-      image: '/path/to/common3.jpg'
+      image: image3
     },
     {
       id: 4,
       name: 'Emma Brown',
       service: 'Administration',
-      image: '/path/to/common4.jpg'
+      image: image3
     },
     {
       id: 5,
       name: 'Michael Johnson',
       service: 'Assistance',
-      image: '/path/to/common5.jpg'
+      image: image2
     },
     {
       id: 6,
       name: 'Jessica Taylor',
       service: 'General Support',
-      image: '/path/to/common6.jpg'
+      image: image1
     }
   ];
 
@@ -62,12 +63,12 @@ const CommonCategoryView = () => {
                 <p className="text-gray-600">{provider.service}</p>
               </div>
             </div>
-            <button className="bg-cyan-400 text-white px-4 py-1 rounded-full text-sm hover:bg-cyan-500 transition">
+            <Link to="/clientbookingpage" className="bg-cyan-400 text-white px-4 py-1 rounded-full text-sm hover:bg-cyan-500 transition">
                 Book Now
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 inline-block ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
               </svg>
-            </button>
+            </Link>
           </div>
         ))}
       </div>

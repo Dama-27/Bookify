@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 const TeacherCategoryView = () => {
   const [subjectFilter, setSubjectFilter] = useState('All');
@@ -96,12 +97,12 @@ const TeacherCategoryView = () => {
               <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
                 {teacher.subject}
               </span>
-              <button className="bg-cyan-400 text-white px-4 py-1 rounded-full text-sm hover:bg-cyan-500 transition">
+              <Link to="/clientbookingpage" className="bg-cyan-400 text-white px-4 py-1 rounded-full text-sm hover:bg-cyan-500 transition">
                 Book Now
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 inline-block ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                 </svg>
-              </button>
+              </Link>
             </div>
           </div>
         ))}

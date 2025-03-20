@@ -1,19 +1,24 @@
-import React, { useState, useEffect, useRef } from "react";
+import React from "react";
 import Button from "../../components/ui/button";
 import "../../styles/Home.css";
 import { Link } from "react-router-dom";
+import image3 from '../../images/Frame 1321314484.png';
 
 
 const navigration = () => {
 
   return (
     
-    <div className= "bg-gray-100">
+    <div className= "bg-gray-100 shadow-sm">
       <nav className="sticky top-0 z-10 flex justify-between items-center p-6 bg-white shadow-sm">
         <div className="max-w-6xl mx-auto flex justify-between items-center w-full h-full rounded-lg border-b-2">
           <div className="flex items-center space-x-2">
             <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-teal-400">
-              BOOKIFY
+              <img 
+                    src={image3} 
+                    alt="Medical Consultation" 
+                    className="w-full h-32 object-cover"
+                  />
             </span>
           </div>
           <div className="hidden md:flex space-x-6">

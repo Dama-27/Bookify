@@ -39,7 +39,7 @@ const CardHome = () => {
     <div className="bg-gray-100">
       
       
-      <section className="py-12 px-6">
+      <section className="py-12 px-6 shadow-md">
         <div className="max-w-6xl mx-auto md:grid-cols-2 gap-10 items-center w-[95%] h-[90%] rounded-lg bg-gradient-to-r from-teal-100 to-teal-50 p-20">
           <div>
             <div className="max-w-6xl mx-auto pb-10">

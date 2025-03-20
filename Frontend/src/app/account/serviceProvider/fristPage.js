@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import ClientBookingPage from '../client/clientBookingPage';
 
+
 const FirstPage = () => {
   const [currentPage, setCurrentPage] = useState('provider'); 
   const [serviceData, setServiceData] = useState({
@@ -80,10 +81,10 @@ const FirstPage = () => {
 
   const renderProviderPage = () => {
     return (
-      <div className="max-w-4xl mx-auto p-4">
-        <h1 className="text-2xl font-bold mb-6 text-center">Service Provider Setup</h1>
+      <div className="max-w-4xl mx-auto p-4 bg-gradient-to-br from-cyan-100 via-blue-100 to-indigo-100">
+        <h1 className="text-2xl font-bold p-10 text-center">Service Provider Setup</h1>
         
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div className="rounded-lg shadow-md p-10 mb-6 bg-gradient-to-br from-cyan-200 via-blue-200 to-indigo-200">
           <h2 className="text-xl font-semibold mb-4">Personal Information</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
@@ -180,7 +181,7 @@ const FirstPage = () => {
           </div>
         </div>
         
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6 bg-gradient-to-br from-cyan-200 via-blue-200 to-indigo-200">
           <h2 className="text-xl font-semibold mb-4">Availability Settings</h2>
           
           <div className="mb-6">

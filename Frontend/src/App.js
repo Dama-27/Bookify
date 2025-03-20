@@ -13,7 +13,11 @@ import Contact from "./app/Home/contact";
 import BookifyDashboard from './components/ui/BookifyDashboard';
 import FristPage from "./app/account/serviceProvider/fristPage"
 import ClientBookingPage from "./app/account/client/clientBookingPage";
-
+import BookifyApp from "./app/payment/BookifyApp";
+import AboutCategoryView from "./app/booking/AboutCategoryView";
+import DoctorCategoryView from "./app/booking/DoctorCategoryView";
+import AccountSettings from "./app/account/serviceProvider/AccountSettings";
+import AccountSettings1 from "./app/account/client/AccountSettings1";
 import "./App.css";
 
 function App() {
@@ -34,6 +38,11 @@ function App() {
           <Route path="/bookifydashboard" element={<BookifyDashboard />} />
           <Route path="/firstpage" element={<FristPage />} />
           <Route path="/clientbookingpage" element={<ClientBookingPage />} />
+          <Route path="/bookifyApp" element={<BookifyApp />} />
+          <Route path="/about" element={<AboutCategoryView />} />
+          <Route path="/doctorcategoryview" element={<DoctorCategoryView />} />
+          <Route path="/accountsettings" element={<AccountSettings />} />
+          <Route path="/accountsettings1" element={<AccountSettings1 />} />
           
         </Routes>
       </div>

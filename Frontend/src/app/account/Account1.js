@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Navigation from "../../components/ui/navigation";
 
 
 // IMAGE 3: Account settings and profile page
@@ -6,33 +7,7 @@ const Account1 = () => {
   return (
     <div className="bg-white min-h-screen">
       {/* Navigation */}
-      <nav className="p-4 border-b">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-8">
-            <div className="flex items-center">
-              <svg className="w-6 h-6 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-              </svg>
-              <span className="text-blue-500 font-medium text-lg">BOOKIFY</span>
-            </div>
-            
-            <div className="flex gap-8">
-              <a className="text-blue-600">Home</a>
-              <a className="text-gray-600">Review</a>
-              <a className="text-gray-600">Community</a>
-              <a className="text-gray-600">Service</a>
-              <a className="text-gray-600">Contact</a>
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-4">
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
-            <span className="text-gray-600">HI THILINA</span>
-          </div>
-        </div>
-      </nav>
+      <Navigation />
       
       {/* Main Content */}
       <div className="max-w-6xl mx-auto p-4">

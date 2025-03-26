@@ -8,6 +8,6 @@ import org.springframework.stereotype.Repository;
 import com.example.Book.model.Consumer;
 
 @Repository
-public interface ConsumerRepository extends JpaRepository<Consumer, String> {
+public interface ConsumerRepository extends JpaRepository<Consumer, Long> {
     Optional<Consumer> findByEmail(String email);
 }

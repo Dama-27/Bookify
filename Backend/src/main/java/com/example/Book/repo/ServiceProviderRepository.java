@@ -8,6 +8,6 @@ import org.springframework.stereotype.Repository;
 import com.example.Book.model.ServiceProvider;
 
 @Repository
-public interface ServiceProviderRepository extends JpaRepository<ServiceProvider, String> {
+public interface ServiceProviderRepository extends JpaRepository<ServiceProvider, Long> {
     Optional<ServiceProvider> findByEmail(String email);
 }

@@ -30,7 +30,7 @@ public class Reminder {
 
     @ManyToOne
     @JoinColumn(name = "booking_id")
-    private Booking booking;
+    private Booking bookingId;
 
     private LocalDateTime reminderDateTime;
     private String reminderType;

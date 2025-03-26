@@ -29,8 +29,8 @@ public class Booking {
     private Integer bookingId;
 
     @ManyToOne
-    @JoinColumn(name = "client_id")
-    private Client client;
+    @JoinColumn(name = "consumer_id")
+    private Consumer consumer;
 
     @ManyToOne
     @JoinColumn(name = "service_id")
@@ -61,12 +61,12 @@ public class Booking {
         this.bookingId = bookingId;
     }
 
-    public Client getClient() {
-        return client;
+    public Consumer getConsumer() {
+        return consumer;
     }
 
-    public void setClient(Client client) {
-        this.client = client;
+    public void setConsumer(Consumer consumer) {
+        this.consumer = consumer;
     }
 
     public Service getService() {

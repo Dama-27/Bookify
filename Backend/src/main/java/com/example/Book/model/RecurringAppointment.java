@@ -27,7 +27,7 @@ public class RecurringAppointment {
 
     @ManyToOne
     @JoinColumn(name = "booking_id")
-    private Booking booking;
+    private Booking bookingId;
 
     private String frequency; // DAILY, WEEKLY, MONTHLY
     private LocalDateTime startDate;

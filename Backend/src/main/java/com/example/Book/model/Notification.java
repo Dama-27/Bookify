@@ -29,8 +29,8 @@ public class Notification {
     private Integer notificationId;
 
     @ManyToOne
-    @JoinColumn(name = "client_id")
-    private Client client;
+    @JoinColumn(name = "consumer_id")
+    private Consumer consumer;
 
     @Column(columnDefinition = "TEXT")
     private String description;

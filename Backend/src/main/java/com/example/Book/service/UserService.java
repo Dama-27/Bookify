@@ -26,28 +26,28 @@ public class UserService {
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     // Register Service Provider with password hashing
-    public String registerServiceProvider(ServiceProvider provider) {
-        Optional<ServiceProvider> exist = serviceProviderRepository.findByEmail(provider.getEmail());
+    public String registerServiceProvider(ServiceProvider providerId) {
+        Optional<ServiceProvider> exist = serviceProviderRepository.findByEmail(providerId.getEmail());
         if (exist.isPresent()) {
             return "Service Provider already exists!";
         }
-        provider.setPassword(passwordEncoder.encode(provider.getPassword()));
-        serviceProviderRepository.save(provider);
+        providerId.setPassword(passwordEncoder.encode(providerId.getPassword()));
+        serviceProviderRepository.save(providerId);
         return "Service Provider registered successfully!";
     }
 
     // Register Consumer with password hashing
-    public String registerConsumer(Consumer consumer) {
+    public String registerConsumer(Consumer consumerId) {
         
         
-        Optional<Consumer> exist = consumerRepository.findByEmail(consumer.getEmail());
+        Optional<Consumer> exist = consumerRepository.findByEmail(consumerId.getEmail());
         if (exist.isPresent()) {
             throw new RuntimeException("Email already registered!");
         }
         
         try {
-            consumer.setPassword(passwordEncoder.encode(consumer.getPassword()));
-            consumerRepository.save(consumer);
+            consumerId.setPassword(passwordEncoder.encode(consumerId.getPassword()));
+            consumerRepository.save(consumerId);
             return "Consumer registered successfully!";
         } catch (Exception e) {
             throw new RuntimeException("Registration failed: " + e.getMessage());

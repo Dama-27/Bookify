@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.Book.model.Consumer;
+import com.example.Book.model.Client;
 import com.example.Book.model.ServiceProvider;
 import com.example.Book.service.UserService;
 
@@ -30,9 +30,9 @@ public class AuthController {
 
     // Register Consumer
     @PostMapping("/consumer/register")
-    public ResponseEntity<String> registerConsumer(@RequestBody Consumer consumer) {
+    public ResponseEntity<String> registerConsumer(@RequestBody Client client) {
         try {
-            String result = userService.registerConsumer(consumer);
+            String result = userService.registerConsumer(client);
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Registration failed: " + e.getMessage());

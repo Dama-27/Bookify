@@ -1,33 +1,23 @@
 package com.example.Book.model;
 
-import java.util.List;
+import jakarta.persistence.*;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import java.util.List;
 
 @Entity
 @Table(name = "client")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class Client {
-
     @Id
+    @Column(name = "client_id", nullable = false, unique = true, length = 50)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "client_id")
     private Integer clientId;
-
-    private String name;
+    @Column(nullable = false, unique = true, length = 50)
     private String email;
+    @Column(nullable = false, length = 64)
+    private String password;
+    @Transient
+    private String confirmPassword;
+
     private String phone;
     private String address;
     private String status;
@@ -48,35 +38,23 @@ public class Client {
     @OneToMany(mappedBy = "client")
     private List<Feedback> feedbacks;
 
-    public Integer getId() {
-        return clientId;
-    }
+    public Client() {}
 
-    public void setId(Integer id) {
-        this.clientId = id;
-    }
+    public Client( String email, String password, String confirmPassword) {
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
         this.email = email;
+        this.password = password;
+        this.confirmPassword = confirmPassword;
     }
 
-    public String getPhone() {
-        return phone;
-    }
+    // Getters and Setters
 
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
+    public String getConfirmPassword() { return confirmPassword; }
+    public void setConfirmPassword(String confirmPassword) { this.confirmPassword = confirmPassword; }
+
+
 }

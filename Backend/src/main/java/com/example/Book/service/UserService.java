@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.example.Book.model.Consumer;
+import com.example.Book.model.Client;
 import com.example.Book.model.ServiceProvider;
 import com.example.Book.repo.ConsumerRepository;
 import com.example.Book.repo.ServiceProviderRepository;
@@ -37,17 +37,17 @@ public class UserService {
     }
 
     // Register Consumer with password hashing
-    public String registerConsumer(Consumer consumer) {
+    public String registerConsumer(Client client) {
         
         
-        Optional<Consumer> exist = consumerRepository.findByEmail(consumer.getEmail());
+        Optional<Client> exist = consumerRepository.findByEmail(client.getEmail());
         if (exist.isPresent()) {
             throw new RuntimeException("Email already registered!");
         }
         
         try {
-            consumer.setPassword(passwordEncoder.encode(consumer.getPassword()));
-            consumerRepository.save(consumer);
+            client.setPassword(passwordEncoder.encode(client.getPassword()));
+            consumerRepository.save(client);
             return "Consumer registered successfully!";
         } catch (Exception e) {
             throw new RuntimeException("Registration failed: " + e.getMessage());
@@ -56,10 +56,10 @@ public class UserService {
 
     // Login both - verify password and return JWT token
     public String loginUser(String email, String password) {
-        Optional<Consumer> consumerOpt = consumerRepository.findByEmail(email);
+        Optional<Client> consumerOpt = consumerRepository.findByEmail(email);
         if (consumerOpt.isPresent()) {
-            Consumer consumer = consumerOpt.get();
-            if (passwordEncoder.matches(password, consumer.getPassword())) {
+            Client client = consumerOpt.get();
+            if (passwordEncoder.matches(password, client.getPassword())) {
                 return jwtService.generateToken(email);
             }
         }

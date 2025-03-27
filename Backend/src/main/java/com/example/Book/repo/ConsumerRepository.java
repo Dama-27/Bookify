@@ -5,9 +5,9 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.example.Book.model.Consumer;
+import com.example.Book.model.Client;
 
 @Repository
-public interface ConsumerRepository extends JpaRepository<Consumer, String> {
-    Optional<Consumer> findByEmail(String email);
+public interface ConsumerRepository extends JpaRepository<Client, Integer> {
+    Optional<Client> findByEmail(String email);
 }

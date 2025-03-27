@@ -1,16 +1,16 @@
 package com.example.Book.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "service_providers")
 public class ServiceProvider {
-    @Id @Column(nullable = false, unique = true, length = 50)
-    private String username;
+    @Id
+    @Column(name = "provider_id", nullable = false, unique = true, length = 50)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer providerId;
+
+
     @Column(nullable = false, unique = true, length = 50)
     private String email;
     @Column(nullable = false, length = 64, unique = true)
@@ -19,10 +19,15 @@ public class ServiceProvider {
     private String confirmPassword;
     private String category;
 
+    private String name;
+    private String contact;
+    private String address;
+    private String specialization;
+    private Integer experience;
     public ServiceProvider() {}
 
-    public ServiceProvider(String username, String email, String password, String confirmPassword, String category) {
-        this.username = username;
+    public ServiceProvider(String email, String password, String confirmPassword, String category) {
+
         this.email = email;
         this.password = password;
         this.confirmPassword = confirmPassword;
@@ -31,8 +36,7 @@ public class ServiceProvider {
 
 
     // Getters and Setters
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
+
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
     public String getPassword() { return password; }

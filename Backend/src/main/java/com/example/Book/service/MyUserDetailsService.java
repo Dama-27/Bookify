@@ -9,7 +9,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import com.example.Book.model.Consumer;
+import com.example.Book.model.Client;
 import com.example.Book.model.ServiceProvider;
 import com.example.Book.repo.ConsumerRepository;
 import com.example.Book.repo.ServiceProviderRepository;
@@ -25,9 +25,9 @@ public class MyUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        Optional<Consumer> consumer = consumerRepository.findByEmail(email);
+        Optional<Client> consumer = consumerRepository.findByEmail(email);
         if (consumer.isPresent()) {
-            Consumer cons = consumer.get();
+            Client cons = consumer.get();
             return User.builder()
                     .username(cons.getEmail())
                     .password(cons.getPassword())

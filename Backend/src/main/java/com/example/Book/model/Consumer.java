@@ -22,7 +22,7 @@ public class Consumer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long consumer_id;
 
-    @Column(nullable = false, unique = true, length = 50)
+    @Column(unique = true, length = 50)
     private String username;
 
     @Column(nullable = false, unique = true, length = 50)

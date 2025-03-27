@@ -23,10 +23,13 @@ public class ServiceProvider {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long provider_id;
-    @Column(nullable = false, unique = true, length = 50)
+
+    @Column(unique = true, length = 50)
     private String username;
+
     @Column(nullable = false, unique = true, length = 50)
     private String email;
+    
     @Column(nullable = false, length = 64, unique = true)
     private String password;
     @Transient

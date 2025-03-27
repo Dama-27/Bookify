@@ -2,7 +2,6 @@ package com.example.Book.model;
 
 import java.time.LocalDateTime;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -22,23 +21,17 @@ import lombok.NoArgsConstructor;
 public class Feedback {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "feedback_id")
     private Integer id;
-
+    
+    @ManyToOne
+    @JoinColumn(name = "consumer_id")
+    private Consumer client;
+    
     @ManyToOne
     @JoinColumn(name = "booking_id")
     private Booking booking;
-
-    @ManyToOne
-    @JoinColumn(name = "consumer_id")
-    private Consumer consumer;
     
-    @Column(nullable = false)
     private Integer rating;
-    
-    @Column(columnDefinition = "TEXT")
     private String comment;
-    
-    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 }

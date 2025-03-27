@@ -30,11 +30,11 @@ public class Booking {
 
     @ManyToOne
     @JoinColumn(name = "consumer_id")
-    private Consumer consumer;
+    private Consumer client;
 
     @ManyToOne
-    @JoinColumn(name = "service_id")
-    private Service service;
+    @JoinColumn(name = "provider_id")
+    private ServiceProvider serviceProvider;
 
     @Column(name = "booking_date_time")
     private LocalDateTime bookingDateTime;
@@ -52,53 +52,4 @@ public class Booking {
 
     @OneToMany(mappedBy = "booking")
     private List<Feedback> feedbacks;
-
-    public int getBookingId() {
-        return bookingId;
-    }
-
-    public void setBookingId(int bookingId) {
-        this.bookingId = bookingId;
-    }
-
-    public Consumer getConsumer() {
-        return consumer;
-    }
-
-    public void setConsumer(Consumer consumer) {
-        this.consumer = consumer;
-    }
-
-    public Service getService() {
-        return service;
-    }
-
-    public void setService(Service service) {
-        this.service = service;
-    }
-
-    public LocalDateTime getBookingDateTime() {
-        return bookingDateTime;
-    }
-
-    public void setBookingDateTime(LocalDateTime bookingDateTime) {
-        this.bookingDateTime = bookingDateTime;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public String getSpecialRequests() {
-        return specialRequests;
-    }
-
-    public void setSpecialRequests(String specialRequests) {
-        this.specialRequests = specialRequests;
-    }
-
 }

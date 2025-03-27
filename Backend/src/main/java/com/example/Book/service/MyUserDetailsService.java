@@ -25,9 +25,9 @@ public class MyUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        Optional<Consumer> consumerId = consumerRepository.findByEmail(email);
-        if (consumerId.isPresent()) {
-            Consumer cons = consumerId.get();
+        Optional<Consumer> consumer = consumerRepository.findByEmail(email);
+        if (consumer.isPresent()) {
+            Consumer cons = consumer.get();
             return User.builder()
                     .username(cons.getEmail())
                     .password(cons.getPassword())
@@ -35,9 +35,9 @@ public class MyUserDetailsService implements UserDetailsService {
                     .build();
         }
 
-        Optional<ServiceProvider> providerId = serviceProviderRepository.findByEmail(email);
-        if (providerId.isPresent()) {
-            ServiceProvider sp = providerId.get();
+        Optional<ServiceProvider> provider = serviceProviderRepository.findByEmail(email);
+        if (provider.isPresent()) {
+            ServiceProvider sp = provider.get();
             return User.builder()
                     .username(sp.getEmail())
                     .password(sp.getPassword())

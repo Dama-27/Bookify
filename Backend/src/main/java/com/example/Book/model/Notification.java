@@ -30,7 +30,7 @@ public class Notification {
 
     @ManyToOne
     @JoinColumn(name = "consumer_id")
-    private Consumer consumer;
+    private Consumer client;
 
     @Column(columnDefinition = "TEXT")
     private String description;

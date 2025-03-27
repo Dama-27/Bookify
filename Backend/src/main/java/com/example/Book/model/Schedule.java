@@ -38,8 +38,8 @@ public class Schedule {
 
 
     @ManyToOne
-    @JoinColumn(name = "service_id")
-    private Service service;
+    @JoinColumn(name = "provider_id")
+    private ServiceProvider provider;
 
 
 }

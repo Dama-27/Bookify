@@ -37,7 +37,7 @@ public class GroupBooking {
 
     @ManyToOne
     @JoinColumn(name = "group_leader_id")
-    private  Consumer groupLeader;
+    private Consumer groupLeader;
 
     @Column(name = "no_of_members")
     private Integer noOfMembers;

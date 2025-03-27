@@ -9,28 +9,29 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+@Entity
+@Table(name = "notification")
 @Getter
 @Setter
-@Entity
-@Table(name = "notifications")
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class Notification {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "notification_id")
     private Integer notificationId;
 
     @ManyToOne
-    @JoinColumn(name = "consumer_id")
-    private Consumer client;
+    @JoinColumn(name = "client_id", nullable = false)
+    private Consumer consumer;
+
+    @ManyToOne
+    @JoinColumn(name = "booking_id", nullable = false)
+    private Booking booking;
 
     @Column(columnDefinition = "TEXT")
     private String description;

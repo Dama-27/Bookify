@@ -14,6 +14,7 @@ import com.example.Book.model.Consumer;
 import com.example.Book.model.ServiceProvider;
 import com.example.Book.service.UserService;
 
+
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/auth")
@@ -25,7 +26,12 @@ public class AuthController {
     // Register Service Provider
     @PostMapping("/service-provider/register")
     public void registerProvider(@RequestBody ServiceProvider provider) {
-        userService.registerServiceProvider(provider);
+        try {
+            String result = userService.registerServiceProvider(provider);
+            ResponseEntity.ok(result);
+        } catch (Exception e) {
+            ResponseEntity.badRequest().body("Registration failed: " + e.getMessage());
+        }
     }
 
     // Register Consumer
@@ -41,11 +47,16 @@ public class AuthController {
 
     // Login for both Service Provider and Consumer
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody Map<String, String> credentials) {
+    public ResponseEntity<Map<String, String>> login(@RequestBody Map<String, String> credentials) {
         String email = credentials.get("email");
         String password = credentials.get("password");
         String token = userService.loginUser(email, password);
-        return ResponseEntity.ok("Bearer " + token);
+
+        if (token == null) {
+            return ResponseEntity.status(401).body(Map.of("error", "Invalid credentials"));
+        }
+
+        return ResponseEntity.ok(Map.of("token", "Bearer " + token));
     }
 
 }

@@ -10,4 +10,5 @@ import com.example.Book.model.Consumer;
 @Repository
 public interface ConsumerRepository extends JpaRepository<Consumer, Long> {
     Optional<Consumer> findByEmail(String email);
+    Optional<Consumer> findByUsername(String username);
 }

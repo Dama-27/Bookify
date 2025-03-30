@@ -30,7 +30,6 @@ public class ServiceProvider {
     private String email;
     
     private String password;
-    private String category;
     private String address;
     private Integer contact;
 

@@ -36,5 +36,4 @@ public class Consumer {
     private String password;
 
     private String notes;
-    
 }

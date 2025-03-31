@@ -1,47 +1,287 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import image1 from '../../images/2149bcff-5c92-4ee7-841d-4e36de2f5770.png';
+import { Link, useNavigate } from "react-router-dom";
+import image1 from "../../images/2149bcff-5c92-4ee7-841d-4e36de2f5770.png";
 import { FcGoogle } from "react-icons/fc";
 import { FaGithub, FaFacebook } from "react-icons/fa6";
+import { loginUser } from "../../services/api";
 
-const LoginForm = () => {
-  const [formData, setFormData] = useState({ email: "", password: "", SId: "" });
+const LoginForm = ({ userType = "consumer", resetPassword = false }) => {
+  const navigate = useNavigate();
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+    role: userType === "consumer" ? "CONSUMER" : "SERVICE_PROVIDER",
+  });
+  const [resetEmail, setResetEmail] = useState("");
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    setError("");
   };
 
-  const handleSubmit = (e) => {
+  const handleResetEmailChange = (e) => {
+    setResetEmail(e.target.value);
+    setError("");
+    setSuccess("");
+  };
+
+  const handleResetPassword = async (e) => {
     e.preventDefault();
-    console.log("Login Data Submitted:", formData);
+    setError("");
+    setSuccess("");
+    setIsLoading(true);
+
+    // Here you would actually call an API to request password reset
+    // For now, we'll just simulate it
+    try {
+      // This would be your actual API call
+      // await requestPasswordReset(resetEmail, userType);
+      console.log(`Password reset requested for ${resetEmail} (${userType})`);
+      setSuccess(`Password reset instructions sent to ${resetEmail}`);
+    } catch (error) {
+      setError(
+        error.message || "Failed to request password reset. Please try again."
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setIsLoading(true);
+
+    try {
+      // Prepare login data with the appropriate role
+      const loginData = {
+        email: formData.email,
+        password: formData.password,
+        role: userType === "consumer" ? "CONSUMER" : "SERVICE_PROVIDER",
+      };
+
+      const response = await loginUser(loginData);
+      console.log("Login successful:", response);
+
+      // Store authentication token and user role
+      if (response.token) {
+        localStorage.setItem("token", response.token);
+        localStorage.setItem(
+          "userRole",
+          userType === "consumer" ? "CONSUMER" : "SERVICE_PROVIDER"
+        );
+
+        // Redirect based on user type
+        if (userType === "consumer") {
+          navigate("/clientbookingpage");
+        } else {
+          navigate("/firstpage");
+        }
+      } else if (response.error) {
+        // Handle explicit error from response
+        setError(
+          response.error || "Login failed. Please check your credentials."
+        );
+      } else {
+        setError("Login failed. Invalid response from server.");
+      }
+    } catch (error) {
+      console.error("Login failed:", error);
+      setError(error.message || "Login failed. Please check your credentials.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Render password reset form if resetPassword is true
+  if (resetPassword) {
+    return (
+      <div className="flex items-center justify-center min-h-56 bg-[#F8F6F4] py-10 h-[90%]">
+        <div className="flex w-full max-w-4xl bg-[#D2F9FA] shadow-lg rounded-lg overflow-hidden">
+          <div
+            className="hidden md:block w-1/2 bg-cover bg-center"
+            style={{ backgroundImage: `url(${image1})` }}
+          ></div>
+          <div className="w-full md:w-1/2 p-4 flex flex-col items-center">
+            <img src="/as.png" alt="Logo" className="w-24 mb-2 p-3" />
+            <form
+              onSubmit={handleResetPassword}
+              className="w-full max-w-sm bg-[#B8EEFB] p-2 rounded-lg shadow-md"
+            >
+              <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
+                Reset Password
+              </h2>
+
+              {error && (
+                <div
+                  className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4"
+                  role="alert"
+                >
+                  <span className="block sm:inline">{error}</span>
+                </div>
+              )}
+
+              {success && (
+                <div
+                  className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4"
+                  role="alert"
+                >
+                  <span className="block sm:inline">{success}</span>
+                </div>
+              )}
+
+              <p className="text-gray-600 mb-4">
+                Enter your email address and we'll send you instructions to
+                reset your password.
+              </p>
+
+              <label className="block text-gray-700 text-left">Email:</label>
+              <input
+                type="email"
+                name="resetEmail"
+                placeholder="Email Address"
+                value={resetEmail}
+                onChange={handleResetEmailChange}
+                className="w-full p-2 border rounded mt-2"
+                required
+              />
+
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full mt-6 py-2 bg-[#27D5E5] rounded hover:bg-[#1CB8CC] text-white"
+              >
+                {isLoading ? "Sending..." : "Reset Password"}
+              </button>
+
+              <div className="text-center mt-4">
+                <Link
+                  to={
+                    userType === "consumer"
+                      ? "/Consumer/login"
+                      : "/service-provider/login"
+                  }
+                  className="text-blue-500 hover:underline"
+                >
+                  Back to Login
+                </Link>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Render login form (default)
   return (
     <div className="flex items-center justify-center min-h-56 bg-[#F8F6F4] py-10 h-[90%]">
       <div className="flex w-full max-w-4xl bg-[#D2F9FA] shadow-lg rounded-lg overflow-hidden">
-        <div className="hidden md:block w-1/2 bg-cover bg-center" style={{ backgroundImage: `url(${image1})` }}></div>
+        <div
+          className="hidden md:block w-1/2 bg-cover bg-center"
+          style={{ backgroundImage: `url(${image1})` }}
+        ></div>
         <div className="w-full md:w-1/2 p-4 flex flex-col items-center">
           <img src="/as.png" alt="Logo" className="w-24 mb-2 p-3" />
-          <form onSubmit={handleSubmit} className="w-full max-w-sm bg-[#B8EEFB] p-2 rounded-lg shadow-md">
-            <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Login</h2>
+          <form
+            onSubmit={handleSubmit}
+            className="w-full max-w-sm bg-[#B8EEFB] p-2 rounded-lg shadow-md"
+          >
+            <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
+              {userType === "consumer" ? "Login" : "Service Provider Login"}
+            </h2>
+
+            {error && (
+              <div
+                className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4"
+                role="alert"
+              >
+                <span className="block sm:inline">{error}</span>
+              </div>
+            )}
+
             <label className="block text-gray-700 text-left">Email:</label>
-            <input type="email" name="email" placeholder="Email Address" value={formData.email} onChange={handleChange} className="w-full p-2 border rounded mt-2" required />
-            <label className="block text-gray-700 mt-4 text-left">Password:</label>
-            <input type="password" name="password" placeholder="Paasword" value={formData.password} onChange={handleChange} className="w-full p-2 border rounded mt-2" required />
-            <label className="block text-gray-700 mt-4 text-left">Service ID:</label>
-            <input type="text" name="SId" placeholder="Serivce Id" value={formData.SId} onChange={handleChange} className="w-full p-2 border rounded mt-2" required />
+            <input
+              type="email"
+              name="email"
+              placeholder="Email Address"
+              value={formData.email}
+              onChange={handleChange}
+              className="w-full p-2 border rounded mt-2"
+              required
+            />
+
+            <label className="block text-gray-700 mt-4 text-left">
+              Password:
+            </label>
+            <input
+              type="password"
+              name="password"
+              placeholder="Password"
+              value={formData.password}
+              onChange={handleChange}
+              className="w-full p-2 border rounded mt-2"
+              required
+            />
+
             <div className="text-left mt-4">
-              <Link to="/forgot-password" className="hover:underline">Forgot Password?</Link>
+              <Link
+                to={
+                  userType === "consumer"
+                    ? "/reset-password"
+                    : "/reset-passwords"
+                }
+                className="hover:underline"
+              >
+                Forgot Password?
+              </Link>
             </div>
-            <button type="submit" className="w-[30%] mt-6 py-1 bg-[#27D5E5] rounded hover:bg-[#1CB8CC]">Login</button>
-          
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full mt-6 py-2 bg-[#27D5E5] rounded hover:bg-[#1CB8CC] text-white"
+            >
+              {isLoading ? "Logging in..." : "Login"}
+            </button>
+
             <p className="text-center text-gray-600 mt-4">or continue with</p>
             <div className="flex justify-center space-x-4 mt-3">
-              <button className="p-2 bg-white border rounded-full shadow hover:bg-gray-100"><FcGoogle /></button>
-              <button className="p-2 bg-white border rounded-full shadow hover:bg-gray-100"><FaGithub /></button>
-              <button className="p-2 bg-white border rounded-full shadow hover:bg-gray-100"><FaFacebook /></button>
+              <button
+                type="button"
+                className="p-2 bg-white border rounded-full shadow hover:bg-gray-100"
+              >
+                <FcGoogle />
+              </button>
+              <button
+                type="button"
+                className="p-2 bg-white border rounded-full shadow hover:bg-gray-100"
+              >
+                <FaGithub />
+              </button>
+              <button
+                type="button"
+                className="p-2 bg-white border rounded-full shadow hover:bg-gray-100"
+              >
+                <FaFacebook />
+              </button>
             </div>
-            <p className="text-center text-gray-700 mt-6">Don't have an account? <Link to="/register" className="text-blue-500 hover:underline">Register here</Link></p>
+            <p className="text-center text-gray-700 mt-6">
+              Don't have an account?{" "}
+              <Link
+                to={
+                  userType === "consumer"
+                    ? "/register?type=consumer"
+                    : "/register?type=service"
+                }
+                className="text-blue-500 hover:underline"
+              >
+                Register here
+              </Link>
+            </p>
           </form>
         </div>
       </div>

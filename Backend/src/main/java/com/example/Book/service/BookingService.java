@@ -7,6 +7,7 @@ import com.example.Book.dto.BookingDTO;
 import com.example.Book.dto.ScheduleDTO;
 import com.example.Book.model.*;
 import com.example.Book.repo.*;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -132,5 +133,20 @@ public class BookingService {
 
         // Save and return
         return bookingRepository.save(booking);
+    }
+
+    public Schedule createSchedule(ScheduleDTO scheduleDTO) {
+        // Find the service provider by ID
+        ServiceProvider provider = serviceProviderRepository
+                .findById(scheduleDTO.getProviderId())
+                .orElseThrow(() -> new EntityNotFoundException("ServiceProvider not found with ID: " + scheduleDTO.getProviderId()));
+
+        // Create a new Schedule entity
+        Schedule schedule = new Schedule();
+        schedule.setProvider(provider);
+        schedule.setDateTime(scheduleDTO.getDateTime());
+
+        // Save and return the schedule
+        return scheduleRepository.save(schedule);
     }
 }

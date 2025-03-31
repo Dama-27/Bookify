@@ -5,6 +5,7 @@ import java.util.List;
 import com.example.Book.dto.BookingDTO;
 import com.example.Book.dto.ScheduleDTO;
 import com.example.Book.model.Booking;
+import com.example.Book.model.Schedule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,6 +40,12 @@ public class BookingController {
     public ResponseEntity<Booking> createBooking(@RequestBody BookingDTO requestDTO) {
         Booking savedBooking = bookingService.saveBooking(requestDTO);
         return new ResponseEntity<>(savedBooking, HttpStatus.CREATED);
+    }
+
+    @PostMapping("/addSchedule")
+    public ResponseEntity<Schedule> createSchedule(@RequestBody ScheduleDTO scheduleDTO) {
+        Schedule savedSchedule = bookingService.createSchedule(scheduleDTO);
+        return new ResponseEntity<>(savedSchedule, HttpStatus.CREATED);
     }
 
 

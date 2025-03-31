@@ -7,6 +7,7 @@ import { FcGoogle } from "react-icons/fc";
 import { FaGithub, FaFacebook } from "react-icons/fa6";
 import { loginUser, loginWithGoogle, loginWithGithub, loginWithFacebook } from "../../services/api";
 import image2 from "../../images/Frame 1321314484.png";
+import RegisterForm from "../signUp/RegisterForm";
 
 const LoginForm = ({ userType = "consumer", resetPassword = false }) => {
   const navigate = useNavigate();
@@ -370,11 +371,7 @@ const LoginForm = ({ userType = "consumer", resetPassword = false }) => {
             <p className="text-center text-gray-700 mt-6">
               Don't have an account?{" "}
               <Link
-                to={
-                  userType === "consumer"
-                    ? "/register?type=consumer"
-                    : "/register?type=service"
-                }
+                to="/signupcommon"
                 className="text-blue-500 hover:underline"
               >
                 Register here

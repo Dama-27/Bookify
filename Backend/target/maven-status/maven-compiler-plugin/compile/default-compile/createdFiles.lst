@@ -6,7 +6,6 @@ com\example\Book\model\Consumer.class
 com\example\Book\controller\AuthController.class
 com\example\Book\config\CorsConfig$1.class
 com\example\Book\config\SecurityConfig.class
-com\example\Book\controller\RoleSelectController.class
 com\example\Book\model\Schedule.class
 com\example\Book\service\ConsumerService.class
 com\example\Book\model\Reminder.class

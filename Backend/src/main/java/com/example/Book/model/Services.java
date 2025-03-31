@@ -15,13 +15,15 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "service")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Service {
+public class Services {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,6 +37,9 @@ public class Service {
     private String specialization;
     private Integer duration;
     private Double price;
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
+    private String date;
 
     private LocalDateTime startTime;
     private LocalDateTime endTime;

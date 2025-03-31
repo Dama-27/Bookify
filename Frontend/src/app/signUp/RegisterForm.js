@@ -8,6 +8,7 @@ import {
   registerservice,
   testConnection,
 } from "../../services/api";
+import image2 from "../../images/Frame 1321314484.png";
 
 const RegisterForm = () => {
   const navigate = useNavigate();
@@ -122,7 +123,7 @@ const RegisterForm = () => {
           style={{ backgroundImage: `url(${image1})` }}
         ></div>
         <div className="w-full md:w-1/2 p-4 flex flex-col items-center">
-          <img src="/as.png" alt="Logo" className="w-24 mb-2 p-4" />
+          <img src={image2}  alt="Logo" className="w-24 mb-2 p-4" />
           <form
             onSubmit={handleSubmit}
             className="w-full max-w-sm bg-[#B8EEFB] p-2 rounded-lg shadow-md"

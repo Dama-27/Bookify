@@ -1,9 +1,12 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import image1 from "../../images/2149bcff-5c92-4ee7-841d-4e36de2f5770.png";
 import { FcGoogle } from "react-icons/fc";
 import { FaGithub, FaFacebook } from "react-icons/fa6";
-import { loginUser } from "../../services/api";
+import { loginUser, loginWithGoogle, loginWithGithub, loginWithFacebook } from "../../services/api";
+import image2 from "../../images/Frame 1321314484.png";
 
 const LoginForm = ({ userType = "consumer", resetPassword = false }) => {
   const navigate = useNavigate();
@@ -16,6 +19,16 @@ const LoginForm = ({ userType = "consumer", resetPassword = false }) => {
     role: userType === "consumer" ? "CONSUMER" : "SERVICE_PROVIDER",
   });
   const [resetEmail, setResetEmail] = useState("");
+  const [formErrors, setFormErrors] = useState({});
+
+  React.useEffect(() => {
+    return () => {
+      // Cleanup function to handle any necessary cleanup
+      if (!localStorage.getItem("userInfo")) {
+        localStorage.setItem("userInfo", JSON.stringify({}));
+      }
+    };
+  }, []);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -50,46 +63,114 @@ const LoginForm = ({ userType = "consumer", resetPassword = false }) => {
     }
   };
 
+  const validateForm = () => {
+    const errors = {};
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!formData.email) {
+      errors.email = "Email is required";
+    } else if (!emailRegex.test(formData.email)) {
+      errors.email = "Invalid email format";
+    }
+
+    if (!formData.password) {
+      errors.password = "Password is required";
+    } else if (formData.password.length < 6) {
+      errors.password = "Password must be at least 6 characters";
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleOAuthLogin = async (provider) => {
+    setIsLoading(true);
+    try {
+      let response;
+      switch (provider) {
+        case 'google':
+          response = await loginWithGoogle();
+          break;
+        case 'github':
+          response = await loginWithGithub();
+          break;
+        case 'facebook':
+          response = await loginWithFacebook();
+          break;
+        default:
+          throw new Error('Invalid provider');
+      }
+
+      if (response.token) {
+        localStorage.setItem("token", response.token);
+        localStorage.setItem("userRole", response.role || userType === "consumer" ? "CONSUMER" : "SERVICE_PROVIDER");
+        
+        if (response.user) {
+          const userInfo = {
+            ...response.user,
+            name: response.user.username // Use username as name
+          };
+          localStorage.setItem("userInfo", JSON.stringify(userInfo));
+        } else {
+          localStorage.setItem("userInfo", JSON.stringify({}));
+        }
+        
+        toast.success("Login successful!");
+        navigate(userType === "consumer" ? "/" : "/accountsettings");
+      }
+    } catch (error) {
+      toast.error(`${provider} login failed: ${error.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    
+    if (!validateForm()) {
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      // Prepare login data with the appropriate role
       const loginData = {
         email: formData.email,
         password: formData.password,
-        role: userType === "consumer" ? "CONSUMER" : "SERVICE_PROVIDER",
+        role: userType === "consumer" ? "consumers" : "service_providers", // Updated role names", // Updated role names
       };
 
       const response = await loginUser(loginData);
-      console.log("Login successful:", response);
 
-      // Store authentication token and user role
       if (response.token) {
+        // Store user info with consistent role namingnaming
         localStorage.setItem("token", response.token);
-        localStorage.setItem(
-          "userRole",
-          userType === "consumer" ? "CONSUMER" : "SERVICE_PROVIDER"
-        );
-
-        // Redirect based on user type
-        if (userType === "consumer") {
-          navigate("/clientbookingpage");
+        localStorage.setItem("userRole", userType === "consumer" ? "consumers" : "service_providers");
+        
+        if (response.user) {
+          const userInfo = {
+            ...response.user,
+            name: response.user.username,
+            role: userType === "consumer" ? "consumers" : "service_providers"
+          };
+          localStorage.setItem("userInfo", JSON.stringify(userInfo));
         } else {
-          navigate("/firstpage");
+          localStorage.setItem("userInfo", JSON.stringify({
+            role: userType === "consumer" ? "consumers" : "service_providers"
+          }));
         }
+        
+        toast.success("Login successful!");
+        navigate(userType === "consumer" ? "/" : "/accountsettings");
       } else if (response.error) {
-        // Handle explicit error from response
-        setError(
-          response.error || "Login failed. Please check your credentials."
-        );
-      } else {
-        setError("Login failed. Invalid response from server.");
+        toast.error(response.error || "Login failed. Please check your credentials.");
+        setError(response.error || "Login failed. Please check your credentials.");
       }
     } catch (error) {
       console.error("Login failed:", error);
+      toast.error(error.message || "Login failed. Please try again.");
       setError(error.message || "Login failed. Please check your credentials.");
     } finally {
       setIsLoading(false);
@@ -106,7 +187,7 @@ const LoginForm = ({ userType = "consumer", resetPassword = false }) => {
             style={{ backgroundImage: `url(${image1})` }}
           ></div>
           <div className="w-full md:w-1/2 p-4 flex flex-col items-center">
-            <img src="/as.png" alt="Logo" className="w-24 mb-2 p-3" />
+            <img src={image2} alt="Logoj" className="w-24 mb-2 p-3" />
             <form
               onSubmit={handleResetPassword}
               className="w-full max-w-sm bg-[#B8EEFB] p-2 rounded-lg shadow-md"
@@ -210,9 +291,14 @@ const LoginForm = ({ userType = "consumer", resetPassword = false }) => {
               placeholder="Email Address"
               value={formData.email}
               onChange={handleChange}
-              className="w-full p-2 border rounded mt-2"
+              className={`w-full p-2 border rounded mt-2 ${
+                formErrors.email ? 'border-red-500' : ''
+              }`}
               required
             />
+            {formErrors.email && (
+              <p className="text-red-500 text-sm mt-1">{formErrors.email}</p>
+            )}
 
             <label className="block text-gray-700 mt-4 text-left">
               Password:
@@ -223,9 +309,14 @@ const LoginForm = ({ userType = "consumer", resetPassword = false }) => {
               placeholder="Password"
               value={formData.password}
               onChange={handleChange}
-              className="w-full p-2 border rounded mt-2"
+              className={`w-full p-2 border rounded mt-2 ${
+                formErrors.password ? 'border-red-500' : ''
+              }`}
               required
             />
+            {formErrors.password && (
+              <p className="text-red-500 text-sm mt-1">{formErrors.password}</p>
+            )}
 
             <div className="text-left mt-4">
               <Link
@@ -252,19 +343,25 @@ const LoginForm = ({ userType = "consumer", resetPassword = false }) => {
             <div className="flex justify-center space-x-4 mt-3">
               <button
                 type="button"
-                className="p-2 bg-white border rounded-full shadow hover:bg-gray-100"
+                onClick={() => handleOAuthLogin('google')}
+                disabled={isLoading}
+                className="p-2 bg-white border rounded-full shadow hover:bg-gray-100 disabled:opacity-50"
               >
                 <FcGoogle />
               </button>
               <button
                 type="button"
-                className="p-2 bg-white border rounded-full shadow hover:bg-gray-100"
+                onClick={() => handleOAuthLogin('github')}
+                disabled={isLoading}
+                className="p-2 bg-white border rounded-full shadow hover:bg-gray-100 disabled:opacity-50"
               >
                 <FaGithub />
               </button>
               <button
                 type="button"
-                className="p-2 bg-white border rounded-full shadow hover:bg-gray-100"
+                onClick={() => handleOAuthLogin('facebook')}
+                disabled={isLoading}
+                className="p-2 bg-white border rounded-full shadow hover:bg-gray-100 disabled:opacity-50"
               >
                 <FaFacebook />
               </button>

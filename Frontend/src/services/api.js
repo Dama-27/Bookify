@@ -141,6 +141,60 @@ export const loginUser = async (formData) => {
   }
 };
 
+export const loginWithGoogle = async () => {
+  try {
+    // Replace with your actual Google OAuth endpoint
+    const response = await fetch(`${BASE_URL}/auth/google`, {
+      method: 'GET',
+      credentials: 'include'
+    });
+    
+    if (!response.ok) {
+      throw new Error('Google login failed');
+    }
+    
+    return await response.json();
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
+export const loginWithGithub = async () => {
+  try {
+    // Replace with your actual GitHub OAuth endpoint
+    const response = await fetch(`${BASE_URL}/auth/github`, {
+      method: 'GET',
+      credentials: 'include'
+    });
+    
+    if (!response.ok) {
+      throw new Error('GitHub login failed');
+    }
+    
+    return await response.json();
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
+export const loginWithFacebook = async () => {
+  try {
+    // Replace with your actual Facebook OAuth endpoint
+    const response = await fetch(`${BASE_URL}/auth/facebook`, {
+      method: 'GET',
+      credentials: 'include'
+    });
+    
+    if (!response.ok) {
+      throw new Error('Facebook login failed');
+    }
+    
+    return await response.json();
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
 // Helper function to check if user is authenticated
 export const isAuthenticated = () => {
   return !!localStorage.getItem("token");
@@ -314,6 +368,35 @@ export const updateServiceProviderProfile = async (profileData) => {
     return await response.json();
   } catch (error) {
     console.error("Error updating service provider profile:", error);
+    throw error;
+  }
+};
+
+// Fetch user profile data
+export const fetchUserProfile = async () => {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    throw new Error("Authentication required");
+  }
+
+  try {
+    const response = await fetch(`${BASE_URL}api/users/profile`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch user profile (${response.status})`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching user profile:", error);
     throw error;
   }
 };

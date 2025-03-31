@@ -31,7 +31,7 @@ public class ServiceProvider {
     
     private String password;
     private String address;
-    private Integer contact;
+    private String contact;
 
     private Integer experience;
     private Boolean isActive;

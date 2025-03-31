@@ -1,3 +1,4 @@
+com\example\Book\repo\FeedbackRepository.class
 com\example\Book\model\GroupBooking.class
 com\example\Book\service\JWTService.class
 com\example\Book\repo\ServiceProviderRepository.class
@@ -7,15 +8,20 @@ com\example\Book\controller\AuthController.class
 com\example\Book\config\CorsConfig$1.class
 com\example\Book\config\SecurityConfig.class
 com\example\Book\model\Schedule.class
+com\example\Book\service\FeedbackService.class
 com\example\Book\service\ConsumerService.class
 com\example\Book\model\Reminder.class
 com\example\Book\model\RoleSelect.class
+com\example\Book\controller\FeedbackController.class
 com\example\Book\config\CorsConfig.class
 com\example\Book\config\JwtFilter.class
 com\example\Book\model\ServiceProvider.class
 com\example\Book\service\MyUserDetailsService.class
+com\example\Book\controller\ConsumerController.class
 com\example\Book\model\Booking.class
+com\example\Book\model\Service.class
 com\example\Book\service\UserService.class
+com\example\Book\dto\FeedbackDTO.class
 com\example\Book\repo\ConsumerRepository.class
 com\example\Book\model\Feedback.class
 com\example\Book\model\RecurringAppointment.class

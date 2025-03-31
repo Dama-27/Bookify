@@ -41,12 +41,6 @@ public class Services {
     private LocalDateTime endTime;
     private String date;
 
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
-    private LocalDateTime date;
-
-
-
     @Column(columnDefinition = "TEXT")
     private String description;
 

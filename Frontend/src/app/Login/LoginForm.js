@@ -108,7 +108,8 @@ const LoginForm = ({ userType = "consumer", resetPassword = false }) => {
         if (response.user) {
           const userInfo = {
             ...response.user,
-            name: response.user.username // Use username as name
+            name: response.user.username,
+            role: userType === "consumer" ? "consumers" : "service_providers"
           };
           localStorage.setItem("userInfo", JSON.stringify(userInfo));
         } else {
@@ -266,7 +267,7 @@ const LoginForm = ({ userType = "consumer", resetPassword = false }) => {
           style={{ backgroundImage: `url(${image1})` }}
         ></div>
         <div className="w-full md:w-1/2 p-4 flex flex-col items-center">
-          <img src="/as.png" alt="Logo" className="w-24 mb-2 p-3" />
+          <img src={image2} alt="Logo" className="w-24 mb-2 p-3" />
           <form
             onSubmit={handleSubmit}
             className="w-full max-w-sm bg-[#B8EEFB] p-2 rounded-lg shadow-md"

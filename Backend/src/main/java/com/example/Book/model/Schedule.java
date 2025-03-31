@@ -27,8 +27,14 @@ public class Schedule {
     private Integer scheduleId;
 
     @ManyToOne
+    @JoinColumn(name = "provider_id", nullable = false)
+    private ServiceProvider provider;
+/*
+    @ManyToOne
     @JoinColumn(name = "client_id", nullable = false)
     private Consumer consumer;
+
+ */
 
     private LocalDateTime dateTime;
 }

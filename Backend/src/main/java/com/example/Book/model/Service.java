@@ -1,5 +1,7 @@
 package com.example.Book.model;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -33,6 +35,12 @@ public class Service {
     private String specialization;
     private Integer duration;
     private Double price;
+
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
+    private LocalDateTime date;
+
+
 
     @Column(columnDefinition = "TEXT")
     private String description;

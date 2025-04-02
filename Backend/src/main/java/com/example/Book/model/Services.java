@@ -34,11 +34,7 @@ public class Services {
 
     private String name;
     private String specialization;
-    private Integer duration;
     private Double price;
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
-    private String date;
 
     @Column(columnDefinition = "TEXT")
     private String description;

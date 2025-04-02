@@ -24,6 +24,14 @@ import com.example.Book.repo.ServiceRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 
+import com.example.Book.dto.*;
+import com.example.Book.model.*;
+import com.example.Book.repo.*;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 @Service
 public class BookingService {
 
@@ -45,6 +53,9 @@ public class BookingService {
     public List<Booking> getAllBookings() {
         return bookingRepository.findAll();
     }
+    @Autowired
+    private ServiceDateTimeRepository serviceDateTimeRepository;
+
 
     public List<ServiceProviderDTO> getAllServiceProvidersWithServices() {
         // Get all service providers
@@ -83,11 +94,7 @@ public class BookingService {
                 service.getService_id(),
                 service.getName(),
                 service.getSpecialization(),
-                service.getDuration(),
                 service.getPrice(),
-                service.getStartTime(),
-                service.getEndTime(),
-                service.getDate(),
                 service.getDescription(),
                 service.getCategory()
         );
@@ -160,5 +167,9 @@ public class BookingService {
 
         // Save and return the schedule
         return scheduleRepository.save(schedule);
+    }
+
+    public List<ServiceDateTimeDTO> getServiceDateTimeByProviderId(Long providerId) {
+        return serviceDateTimeRepository.findByProviderId(providerId);
     }
 }

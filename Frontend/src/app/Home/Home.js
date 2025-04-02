@@ -8,19 +8,16 @@ import CardHome from "../../components/Home/card_home";
 import Slider from "../../components/Home/slider";
 
 const Home = () => {
-  
   return (
-    
     <div className="bg-gray-100">
       <Navigation />
-      <Slider/>
-      <CardHome/>
-      <Booking/>
+      <Slider />
+      <CardHome />
+      <Booking />
       <Feedback />
-      <div className="items-center"> 
-        <Footer/>
+      <div className="items-center">
+        <Footer />
       </div>
-
     </div>
   );
 };

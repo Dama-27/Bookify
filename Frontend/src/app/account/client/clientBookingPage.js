@@ -27,7 +27,7 @@ const ClientBookingPage = () => {
       const userRole = localStorage.getItem("userRole");
 
       if (!token || userRole !== "CONSUMER") {
-        navigate("/Consumer/login");
+        navigate("/clientbookingpage");
         return false;
       }
       return true;

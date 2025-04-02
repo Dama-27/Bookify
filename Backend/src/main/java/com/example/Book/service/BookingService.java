@@ -3,17 +3,29 @@ package com.example.Book.service;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.example.Book.dto.BookingDTO;
-import com.example.Book.dto.ScheduleDTO;
-import com.example.Book.model.*;
-import com.example.Book.repo.*;
-import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.example.Book.dto.BookingDTO;
+import com.example.Book.dto.ScheduleDTO;
 import com.example.Book.dto.ServiceDTO;
 import com.example.Book.dto.ServiceProviderDTO;
+import com.example.Book.model.Booking;
+import com.example.Book.model.Consumer;
+import com.example.Book.model.Schedule;
+import com.example.Book.model.ServiceProvider;
+import com.example.Book.model.Services;
+import com.example.Book.repo.BookingRepository;
+import com.example.Book.repo.ConsumerRepository;
+import com.example.Book.repo.ScheduleRepository;
+import com.example.Book.repo.ServiceProviderRepository;
+import com.example.Book.repo.ServiceRepository;
+
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
+
+import com.example.Book.dto.*;
+import com.example.Book.repo.*;
 
 @Service
 public class BookingService {
@@ -32,6 +44,12 @@ public class BookingService {
 
     @Autowired
     private ConsumerRepository consumerRepository;
+
+    public List<Booking> getAllBookings() {
+        return bookingRepository.findAll();
+    }
+    @Autowired
+    private ServiceDateTimeRepository serviceDateTimeRepository;
 
 
     public List<ServiceProviderDTO> getAllServiceProvidersWithServices() {
@@ -71,11 +89,7 @@ public class BookingService {
                 service.getService_id(),
                 service.getName(),
                 service.getSpecialization(),
-                service.getDuration(),
                 service.getPrice(),
-                service.getStartTime(),
-                service.getEndTime(),
-                service.getDate(),
                 service.getDescription(),
                 service.getCategory()
         );
@@ -148,5 +162,9 @@ public class BookingService {
 
         // Save and return the schedule
         return scheduleRepository.save(schedule);
+    }
+
+    public List<ServiceDateTimeDTO> getServiceDateTimeByProviderId(Long providerId) {
+        return serviceDateTimeRepository.findByProviderId(providerId);
     }
 }

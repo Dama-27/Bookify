@@ -4,6 +4,7 @@ import java.util.Date;
 
 public class FeedbackDTO {
     private Long consumerId;
+    private String consumerName;  // Added field for consumer's name
     private String comments;
     private int rating;
     private Date responseDate;
@@ -11,8 +12,9 @@ public class FeedbackDTO {
 
     public FeedbackDTO() {}
 
-    public FeedbackDTO(Long consumerId, Long bookingId, String comments, int rating, Date responseDate) {
+    public FeedbackDTO(Long consumerId, String consumerName, Long bookingId, String comments, int rating, Date responseDate) {
         this.consumerId = consumerId;
+        this.consumerName = consumerName;
         this.bookingId = bookingId;
         this.comments = comments;
         this.rating = rating;
@@ -21,6 +23,9 @@ public class FeedbackDTO {
 
     public Long getConsumerId() { return consumerId; }
     public void setConsumerId(Long consumerId) { this.consumerId = consumerId; }
+
+    public String getConsumerName() { return consumerName; }
+    public void setConsumerName(String consumerName) { this.consumerName = consumerName; }
 
     public Long getBookingId() { return bookingId; }
     public void setBookingId(Long bookingId) { this.bookingId = bookingId; }

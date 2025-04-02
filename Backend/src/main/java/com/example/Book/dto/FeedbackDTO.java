@@ -7,13 +7,11 @@ public class FeedbackDTO {
     private String comments;
     private int rating;
     private Date responseDate;
-    private Long bookingId;
 
     public FeedbackDTO() {}
 
-    public FeedbackDTO(Long consumerId, Long bookingId, String comments, int rating, Date responseDate) {
+    public FeedbackDTO(Long consumerId, String comments, int rating, Date responseDate) {
         this.consumerId = consumerId;
-        this.bookingId = bookingId;
         this.comments = comments;
         this.rating = rating;
         this.responseDate = responseDate;
@@ -21,9 +19,6 @@ public class FeedbackDTO {
 
     public Long getConsumerId() { return consumerId; }
     public void setConsumerId(Long consumerId) { this.consumerId = consumerId; }
-
-    public Long getBookingId() { return bookingId; }
-    public void setBookingId(Long bookingId) { this.bookingId = bookingId; }
 
     public String getComments() { return comments; }
     public void setComments(String comments) { this.comments = comments; }

@@ -5,7 +5,12 @@ import "react-toastify/dist/ReactToastify.css";
 import image1 from "../../images/2149bcff-5c92-4ee7-841d-4e36de2f5770.png";
 import { FcGoogle } from "react-icons/fc";
 import { FaGithub, FaFacebook } from "react-icons/fa6";
-import { loginUser, loginWithGoogle, loginWithGithub, loginWithFacebook } from "../../services/api";
+import {
+  loginUser,
+  loginWithGoogle,
+  loginWithGithub,
+  loginWithFacebook,
+} from "../../services/api";
 import image2 from "../../images/Frame 1321314484.png";
 import RegisterForm from "../signUp/RegisterForm";
 
@@ -51,8 +56,6 @@ const LoginForm = ({ userType = "consumer", resetPassword = false }) => {
     // Here you would actually call an API to request password reset
     // For now, we'll just simulate it
     try {
-      // This would be your actual API call
-      // await requestPasswordReset(resetEmail, userType);
       console.log(`Password reset requested for ${resetEmail} (${userType})`);
       setSuccess(`Password reset instructions sent to ${resetEmail}`);
     } catch (error) {
@@ -89,34 +92,39 @@ const LoginForm = ({ userType = "consumer", resetPassword = false }) => {
     try {
       let response;
       switch (provider) {
-        case 'google':
+        case "google":
           response = await loginWithGoogle();
           break;
-        case 'github':
+        case "github":
           response = await loginWithGithub();
           break;
-        case 'facebook':
+        case "facebook":
           response = await loginWithFacebook();
           break;
         default:
-          throw new Error('Invalid provider');
+          throw new Error("Invalid provider");
       }
 
       if (response.token) {
         localStorage.setItem("token", response.token);
-        localStorage.setItem("userRole", response.role || userType === "consumer" ? "CONSUMER" : "SERVICE_PROVIDER");
-        
+        localStorage.setItem(
+          "userRole",
+          response.role || userType === "consumer"
+            ? "CONSUMER"
+            : "SERVICE_PROVIDER"
+        );
+
         if (response.user) {
           const userInfo = {
             ...response.user,
             name: response.user.username,
-            role: userType === "consumer" ? "consumers" : "service_providers"
+            role: userType === "consumer" ? "consumers" : "service_providers",
           };
           localStorage.setItem("userInfo", JSON.stringify(userInfo));
         } else {
           localStorage.setItem("userInfo", JSON.stringify({}));
         }
-        
+
         toast.success("Login successful!");
         navigate(userType === "consumer" ? "/" : "/accountsettings");
       }
@@ -130,7 +138,7 @@ const LoginForm = ({ userType = "consumer", resetPassword = false }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    
+
     if (!validateForm()) {
       return;
     }
@@ -141,34 +149,53 @@ const LoginForm = ({ userType = "consumer", resetPassword = false }) => {
       const loginData = {
         email: formData.email,
         password: formData.password,
-        role: userType === "consumer" ? "consumers" : "service_providers", // Updated role names", // Updated role names
+        role: userType === "consumer" ? "consumers" : "service_providers",
       };
 
+      console.log("Attempting login with data:", loginData);
       const response = await loginUser(loginData);
 
       if (response.token) {
-        // Store user info with consistent role namingnaming
+        // Store user info with consistent role naming
         localStorage.setItem("token", response.token);
-        localStorage.setItem("userRole", userType === "consumer" ? "consumers" : "service_providers");
-        
+        localStorage.setItem(
+          "userRole",
+          userType === "consumer" ? "consumers" : "service_providers"
+        );
+
         if (response.user) {
           const userInfo = {
             ...response.user,
             name: response.user.username,
-            role: userType === "consumer" ? "consumers" : "service_providers"
+            role: userType === "consumer" ? "consumers" : "service_providers",
           };
           localStorage.setItem("userInfo", JSON.stringify(userInfo));
         } else {
-          localStorage.setItem("userInfo", JSON.stringify({
-            role: userType === "consumer" ? "consumers" : "service_providers"
-          }));
+          localStorage.setItem(
+            "userInfo",
+            JSON.stringify({
+              role: userType === "consumer" ? "consumers" : "service_providers",
+            })
+          );
         }
-        
+
         toast.success("Login successful!");
-        navigate(userType === "consumer" ? "/" : "/accountsettings");
+
+        // Add a small delay before navigation to ensure localStorage is updated
+        setTimeout(() => {
+          if (userType === "consumer") {
+            navigate("/");
+          } else {
+            navigate("/accountsettings");
+          }
+        }, 100);
       } else if (response.error) {
-        toast.error(response.error || "Login failed. Please check your credentials.");
-        setError(response.error || "Login failed. Please check your credentials.");
+        toast.error(
+          response.error || "Login failed. Please check your credentials."
+        );
+        setError(
+          response.error || "Login failed. Please check your credentials."
+        );
       }
     } catch (error) {
       console.error("Login failed:", error);
@@ -294,7 +321,7 @@ const LoginForm = ({ userType = "consumer", resetPassword = false }) => {
               value={formData.email}
               onChange={handleChange}
               className={`w-full p-2 border rounded mt-2 ${
-                formErrors.email ? 'border-red-500' : ''
+                formErrors.email ? "border-red-500" : ""
               }`}
               required
             />
@@ -312,7 +339,7 @@ const LoginForm = ({ userType = "consumer", resetPassword = false }) => {
               value={formData.password}
               onChange={handleChange}
               className={`w-full p-2 border rounded mt-2 ${
-                formErrors.password ? 'border-red-500' : ''
+                formErrors.password ? "border-red-500" : ""
               }`}
               required
             />
@@ -345,7 +372,7 @@ const LoginForm = ({ userType = "consumer", resetPassword = false }) => {
             <div className="flex justify-center space-x-4 mt-3">
               <button
                 type="button"
-                onClick={() => handleOAuthLogin('google')}
+                onClick={() => handleOAuthLogin("google")}
                 disabled={isLoading}
                 className="p-2 bg-white border rounded-full shadow hover:bg-gray-100 disabled:opacity-50"
               >
@@ -353,7 +380,7 @@ const LoginForm = ({ userType = "consumer", resetPassword = false }) => {
               </button>
               <button
                 type="button"
-                onClick={() => handleOAuthLogin('github')}
+                onClick={() => handleOAuthLogin("github")}
                 disabled={isLoading}
                 className="p-2 bg-white border rounded-full shadow hover:bg-gray-100 disabled:opacity-50"
               >
@@ -361,7 +388,7 @@ const LoginForm = ({ userType = "consumer", resetPassword = false }) => {
               </button>
               <button
                 type="button"
-                onClick={() => handleOAuthLogin('facebook')}
+                onClick={() => handleOAuthLogin("facebook")}
                 disabled={isLoading}
                 className="p-2 bg-white border rounded-full shadow hover:bg-gray-100 disabled:opacity-50"
               >

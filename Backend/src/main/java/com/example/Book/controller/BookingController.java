@@ -20,11 +20,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.Book.dto.BookingDTO;
-import com.example.Book.dto.ScheduleDTO;
+
 import com.example.Book.dto.ServiceProviderDTO;
-import com.example.Book.model.Booking;
-import com.example.Book.model.Schedule;
 import com.example.Book.service.BookingService;
 
 @RestController

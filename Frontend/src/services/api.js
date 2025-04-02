@@ -2,8 +2,15 @@ export const BASE_URL = "http://localhost:8081/";
 
 // Helper function to handle API responses
 const handleResponse = async (response) => {
+  const contentType = response.headers.get("content-type");
   if (!response.ok) {
     const errorText = await response.text();
+    console.error("API Error Response:", {
+      status: response.status,
+      statusText: response.statusText,
+      body: errorText,
+      headers: Object.fromEntries(response.headers.entries()),
+    });
     try {
       const errorJson = JSON.parse(errorText);
       throw new Error(errorJson.message || "An error occurred");
@@ -12,15 +19,25 @@ const handleResponse = async (response) => {
     }
   }
 
-  try {
-    return await response.json();
-  } catch (e) {
-    return { success: true };
+  if (contentType && contentType.includes("application/json")) {
+    try {
+      const jsonData = await response.json();
+      console.log("API Success Response:", jsonData);
+      return jsonData;
+    } catch (e) {
+      console.error("JSON Parse Error:", e);
+      return { success: true };
+    }
+  } else {
+    const textData = await response.text();
+    console.log("API Text Response:", textData);
+    return { success: true, data: textData };
   }
 };
 
 // Helper function to handle network errors
 const handleNetworkError = (error) => {
+  console.error("Network Error:", error);
   if (!window.navigator.onLine) {
     throw new Error("No internet connection. Please check your network.");
   }
@@ -30,6 +47,35 @@ const handleNetworkError = (error) => {
     );
   }
   throw error;
+};
+
+// Helper function to get clean token
+const getCleanToken = () => {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    throw new Error("Authentication required");
+  }
+  // Remove any whitespace and Bearer prefix
+  const cleanToken = token.replace(/^Bearer\s+/, "").trim();
+  if (!cleanToken) {
+    throw new Error("Invalid token format");
+  }
+  return cleanToken;
+};
+
+// Helper function to handle auth errors
+const handleAuthError = (error) => {
+  console.error("Authentication error:", error);
+  // Clear all auth-related data
+  localStorage.removeItem("token");
+  localStorage.removeItem("userInfo");
+  localStorage.removeItem("userRole");
+
+  // Only redirect if we're not already on the login page
+  if (!window.location.pathname.includes("/login")) {
+    window.location.href = "/service-provider/login";
+  }
+  throw new Error("Session expired. Please login again.");
 };
 
 // Registration endpoints
@@ -108,7 +154,6 @@ export const registercustomer = async (formData) => {
 export const loginUser = async (formData) => {
   const endpoint = "auth/login";
 
-  // Add logging to debug the request
   console.log("Login request:", {
     url: `${BASE_URL}${endpoint}`,
     data: formData,
@@ -120,23 +165,46 @@ export const loginUser = async (formData) => {
       headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "POST, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization",
       },
       credentials: "include",
       body: JSON.stringify(formData),
     });
 
-    // Check for authentication failure specifically
     if (response.status === 401 || response.status === 403) {
       throw new Error(
         "Incorrect credentials. Please check your email and password."
       );
     }
 
-    return handleResponse(response);
+    const data = await handleResponse(response);
+    console.log("Login response data:", data);
+
+    if (data.token) {
+      // Store the clean token without Bearer prefix and whitespace
+      const cleanToken = data.token.replace(/^Bearer\s+/, "").trim();
+      if (!cleanToken) {
+        throw new Error("Invalid token received from server");
+      }
+      localStorage.setItem("token", cleanToken);
+      console.log("Token stored in localStorage:", cleanToken);
+
+      if (data.user) {
+        localStorage.setItem("userInfo", JSON.stringify(data.user));
+        console.log("User info stored in localStorage:", data.user);
+      }
+
+      const userRole =
+        formData.role === "consumers" ? "consumer" : "service-provider";
+      localStorage.setItem("userRole", userRole);
+      console.log("User role stored in localStorage:", userRole);
+    } else {
+      console.error("No token received in login response");
+      throw new Error("Login failed: No token received");
+    }
+
+    return data;
   } catch (error) {
+    console.error("Login error:", error);
     return handleNetworkError(error);
   }
 };
@@ -145,14 +213,14 @@ export const loginWithGoogle = async () => {
   try {
     // Replace with your actual Google OAuth endpoint
     const response = await fetch(`${BASE_URL}/auth/google`, {
-      method: 'GET',
-      credentials: 'include'
+      method: "GET",
+      credentials: "include",
     });
-    
+
     if (!response.ok) {
-      throw new Error('Google login failed');
+      throw new Error("Google login failed");
     }
-    
+
     return await response.json();
   } catch (error) {
     throw new Error(error.message);
@@ -163,14 +231,14 @@ export const loginWithGithub = async () => {
   try {
     // Replace with your actual GitHub OAuth endpoint
     const response = await fetch(`${BASE_URL}/auth/github`, {
-      method: 'GET',
-      credentials: 'include'
+      method: "GET",
+      credentials: "include",
     });
-    
+
     if (!response.ok) {
-      throw new Error('GitHub login failed');
+      throw new Error("GitHub login failed");
     }
-    
+
     return await response.json();
   } catch (error) {
     throw new Error(error.message);
@@ -181,14 +249,14 @@ export const loginWithFacebook = async () => {
   try {
     // Replace with your actual Facebook OAuth endpoint
     const response = await fetch(`${BASE_URL}/auth/facebook`, {
-      method: 'GET',
-      credentials: 'include'
+      method: "GET",
+      credentials: "include",
     });
-    
+
     if (!response.ok) {
-      throw new Error('Facebook login failed');
+      throw new Error("Facebook login failed");
     }
-    
+
     return await response.json();
   } catch (error) {
     throw new Error(error.message);
@@ -342,13 +410,10 @@ export const createBooking = async (bookingData) => {
 
 // Update service provider profile
 export const updateServiceProviderProfile = async (profileData) => {
-  const token = localStorage.getItem("token");
-
-  if (!token) {
-    throw new Error("Authentication required");
-  }
-
   try {
+    const token = getCleanToken();
+    console.log("Sending profile update with data:", profileData);
+
     const response = await fetch(`${BASE_URL}api/service-providers/profile`, {
       method: "PUT",
       headers: {
@@ -360,14 +425,48 @@ export const updateServiceProviderProfile = async (profileData) => {
       body: JSON.stringify(profileData),
     });
 
+    console.log("Profile update response status:", response.status);
+
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`Failed to update profile: ${errorText}`);
+      console.error("Profile update error response:", errorText);
+
+      if (response.status === 401 || response.status === 403) {
+        return handleAuthError(new Error(errorText || "Authentication failed"));
+      }
+
+      // Try to parse error message if it's JSON
+      try {
+        const errorJson = JSON.parse(errorText);
+        throw new Error(errorJson.message || errorText);
+      } catch (e) {
+        // If parsing fails, throw the raw error text
+        throw new Error(errorText || "Failed to update profile");
+      }
     }
 
-    return await response.json();
+    const updatedData = await response.json();
+    console.log("Profile update success response:", updatedData);
+
+    // Update local storage with new data
+    const userInfo = JSON.parse(localStorage.getItem("userInfo") || "{}");
+    const newUserInfo = {
+      ...userInfo,
+      ...updatedData,
+    };
+    console.log("Updating localStorage with:", newUserInfo);
+    localStorage.setItem("userInfo", JSON.stringify(newUserInfo));
+
+    return updatedData;
   } catch (error) {
     console.error("Error updating service provider profile:", error);
+    if (
+      error.message.includes("Authentication required") ||
+      error.message.includes("Session expired") ||
+      error.message.includes("Invalid token")
+    ) {
+      return handleAuthError(error);
+    }
     throw error;
   }
 };
@@ -376,27 +475,128 @@ export const updateServiceProviderProfile = async (profileData) => {
 export const fetchUserProfile = async () => {
   const token = localStorage.getItem("token");
   if (!token) {
+    console.error("No token found in localStorage");
     throw new Error("Authentication required");
   }
 
   try {
+    // Ensure token doesn't already have Bearer prefix
+    const authToken = token.startsWith("Bearer ") ? token : `Bearer ${token}`;
+    console.log("Fetching user profile with token:", authToken);
+
     const response = await fetch(`${BASE_URL}api/users/profile`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+        Authorization: authToken,
         Accept: "application/json",
       },
       credentials: "include",
     });
 
+    console.log("Profile response status:", response.status);
+    console.log(
+      "Profile response headers:",
+      Object.fromEntries(response.headers.entries())
+    );
+
     if (!response.ok) {
-      throw new Error(`Failed to fetch user profile (${response.status})`);
+      const errorText = await response.text();
+      console.error("Profile fetch error:", {
+        status: response.status,
+        statusText: response.statusText,
+        body: errorText,
+        headers: Object.fromEntries(response.headers.entries()),
+      });
+
+      // If unauthorized, clear token and userInfo
+      if (response.status === 401 || response.status === 403) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("userInfo");
+        throw new Error("Session expired. Please login again.");
+      }
+
+      throw new Error(
+        `Failed to fetch user profile (${response.status}): ${errorText}`
+      );
     }
 
-    return await response.json();
+    const data = await response.json();
+    console.log("Profile data received:", data);
+
+    // Update userInfo in localStorage with latest data
+    if (data) {
+      localStorage.setItem("userInfo", JSON.stringify(data));
+    }
+
+    return data;
   } catch (error) {
     console.error("Error fetching user profile:", error);
+    throw error;
+  }
+};
+
+// Fetch service provider profile
+export const fetchServiceProviderProfile = async () => {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    console.error("No token found in localStorage");
+    throw new Error("Authentication required");
+  }
+
+  try {
+    // Ensure token doesn't already have Bearer prefix
+    const authToken = token.startsWith("Bearer ") ? token : `Bearer ${token}`;
+    console.log("Fetching service provider profile with token:", authToken);
+
+    const response = await fetch(`${BASE_URL}api/service-providers/profile`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: authToken,
+        Accept: "application/json",
+      },
+      credentials: "include",
+    });
+
+    console.log("Profile response status:", response.status);
+    console.log(
+      "Profile response headers:",
+      Object.fromEntries(response.headers.entries())
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Profile fetch error:", {
+        status: response.status,
+        statusText: response.statusText,
+        body: errorText,
+        headers: Object.fromEntries(response.headers.entries()),
+      });
+
+      // If unauthorized, clear token and userInfo
+      if (response.status === 401 || response.status === 403) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("userInfo");
+        throw new Error("Session expired. Please login again.");
+      }
+
+      throw new Error(
+        `Failed to fetch profile (${response.status}): ${errorText}`
+      );
+    }
+
+    const data = await response.json();
+    console.log("Profile data received:", data);
+
+    // Update userInfo in localStorage with latest data
+    if (data) {
+      localStorage.setItem("userInfo", JSON.stringify(data));
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Error fetching service provider profile:", error);
     throw error;
   }
 };

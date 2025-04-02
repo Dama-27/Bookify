@@ -1,142 +1,71 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import MyProfile from "./MyProfile";
-import ServiceDetails from "./ServiceDetails";
-import Notifications from "./Notifications";
-import BookingService from "./BookingService";
-import Security from "./Security";
-import ResetPassword from "./ResetPassword";
-import DeleteAccount from "./DeleteAccount";
+import React, { useState } from 'react';
+import MyProfile from './MyProfile';
+import ServiceDetails from './ServiceDetails';
+import Notifications from './Notifications';
+import BookingService from './BookingService';
+import Security from './Security';
+import ResetPassword from './ResetPassword';
+import DeleteAccount from './DeleteAccount';
 import Navigation from "../../../components/ui/navigation";
-import { fetchServiceProviderProfile } from "../../../services/api";
 
 const AccountSettings = () => {
-  const navigate = useNavigate();
-  const [currentPage, setCurrentPage] = useState("profile");
+  const [currentPage, setCurrentPage] = useState('profile');
   const [userData, setUserData] = useState({
-    username: "",
-    email: "",
-    address: "",
-    contact: "",
-    experience: 0,
-    isActive: false,
+    name: 'John Doe',
+    bio: 'Medical professional',
+    photo: '/profile-image.jpg',
     personalInfo: {
-      firstName: "",
-      lastName: "",
-      phone: "",
-      role: "Service Provider",
+      firstName: 'Thilina',
+      lastName: 'Thilina',
+      email: 'Thilina@gmail.com',
+      phone: '07********',
+      role: 'Student'
     },
     address: {
-      country: "",
-      city: "",
-      district: "",
-      postalCode: "",
-    },
+      country: 'Sri Lanka',
+      city: 'Colombo',
+      district: 'Western',
+      postalCode: '10100'
+    }
   });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    // Check authentication
-    const token = localStorage.getItem("token");
-    const userRole = localStorage.getItem("userRole");
-
-    console.log("Checking authentication:", { token, userRole });
-
-    if (!token) {
-      console.error("No token found, redirecting to login");
-      navigate("/service-provider/login");
-      return;
-    }
-
-    if (userRole !== "service_providers") {
-      console.error("User is not a service provider, redirecting to login");
-      navigate("/service-provider/login");
-      return;
-    }
-
-    const loadProfileData = async () => {
-      try {
-        console.log("Loading profile data...");
-        const profileData = await fetchServiceProviderProfile();
-        console.log("Received profile data:", profileData);
-
-        if (!profileData) {
-          throw new Error("No profile data received");
-        }
-
-        setUserData((prevData) => ({
-          ...prevData,
-          username: profileData.username || "",
-          email: profileData.email || "",
-          address: profileData.address || "",
-          contact: profileData.contact || "",
-          experience: profileData.experience || 0,
-          isActive: profileData.isActive || false,
-          personalInfo: {
-            ...prevData.personalInfo,
-            phone: profileData.contact || "",
-          },
-        }));
-      } catch (err) {
-        console.error("Error loading profile:", err);
-        if (
-          err.message.includes("Authentication required") ||
-          err.message.includes("Session expired")
-        ) {
-          // Clear localStorage and redirect to login
-          localStorage.removeItem("token");
-          localStorage.removeItem("userInfo");
-          localStorage.removeItem("userRole");
-          navigate("/service-provider/login");
-        } else {
-          setError(err.message || "Failed to load profile data");
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadProfileData();
-  }, [navigate]);
 
   const renderSidebar = () => {
     return (
       <div className="w-full md:w-48 bg-cyan-100 rounded-lg shadow-sm p-4">
-        <SidebarItem
-          label="My Profile"
-          active={currentPage === "profile"}
-          onClick={() => setCurrentPage("profile")}
+        <SidebarItem 
+          label="My Profile" 
+          active={currentPage === 'profile'} 
+          onClick={() => setCurrentPage('profile')} 
         />
-        <SidebarItem
-          label="Service Details"
-          active={currentPage === "serviceDetails"}
-          onClick={() => setCurrentPage("serviceDetails")}
+        <SidebarItem 
+          label="Service Details" 
+          active={currentPage === 'serviceDetails'} 
+          onClick={() => setCurrentPage('serviceDetails')} 
         />
-        <SidebarItem
-          label="Notifications"
-          active={currentPage === "notifications"}
-          onClick={() => setCurrentPage("notifications")}
+        <SidebarItem 
+          label="Notifications" 
+          active={currentPage === 'notifications'} 
+          onClick={() => setCurrentPage('notifications')} 
         />
-        <SidebarItem
-          label="Booking Service"
-          active={currentPage === "bookingService"}
-          onClick={() => setCurrentPage("bookingService")}
+        <SidebarItem 
+          label="Booking Service" 
+          active={currentPage === 'bookingService'} 
+          onClick={() => setCurrentPage('bookingService')} 
         />
-        <SidebarItem
-          label="Security"
-          active={currentPage === "security"}
-          onClick={() => setCurrentPage("security")}
+        <SidebarItem 
+          label="Security" 
+          active={currentPage === 'security'} 
+          onClick={() => setCurrentPage('security')} 
         />
-        <SidebarItem
-          label="Reset Password"
-          active={currentPage === "resetPassword"}
-          onClick={() => setCurrentPage("resetPassword")}
+        <SidebarItem 
+          label="Reset Password" 
+          active={currentPage === 'resetPassword'} 
+          onClick={() => setCurrentPage('resetPassword')} 
         />
-
+        
         <div className="mt-8">
           <button
-            onClick={() => setCurrentPage("deleteAccount")}
+            onClick={() => setCurrentPage('deleteAccount')}
             className="text-red-500 font-medium hover:text-red-600 transition"
           >
             Delete account
@@ -148,12 +77,10 @@ const AccountSettings = () => {
 
   const SidebarItem = ({ label, active, onClick }) => {
     return (
-      <div
+      <div 
         onClick={onClick}
         className={`py-3 px-4 my-1 cursor-pointer rounded-md transition ${
-          active
-            ? "bg-blue-100 text-blue-500 font-medium"
-            : "text-gray-700 hover:bg-gray-100"
+          active ? 'bg-blue-100 text-blue-500 font-medium' : 'text-gray-700 hover:bg-gray-100'
         }`}
       >
         {label}
@@ -162,30 +89,20 @@ const AccountSettings = () => {
   };
 
   const renderContent = () => {
-    if (loading) {
-      return <div className="text-center py-4">Loading profile data...</div>;
-    }
-
-    if (error) {
-      return (
-        <div className="text-red-500 text-center py-4">Error: {error}</div>
-      );
-    }
-
-    switch (currentPage) {
-      case "profile":
+    switch(currentPage) {
+      case 'profile':
         return <MyProfile userData={userData} setUserData={setUserData} />;
-      case "serviceDetails":
+      case 'serviceDetails':
         return <ServiceDetails userData={userData} setUserData={setUserData} />;
-      case "notifications":
+      case 'notifications':
         return <Notifications />;
-      case "bookingService":
+      case 'bookingService':
         return <BookingService />;
-      case "security":
+      case 'security':
         return <Security />;
-      case "resetPassword":
+      case 'resetPassword':
         return <ResetPassword />;
-      case "deleteAccount":
+      case 'deleteAccount':
         return <DeleteAccount />;
       default:
         return <MyProfile userData={userData} setUserData={setUserData} />;
@@ -196,13 +113,15 @@ const AccountSettings = () => {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-6xl mx-auto">
         <Navigation />
-
+        
         <h1 className="text-2xl font-bold mb-6">Account Settings</h1>
-
+        
         <div className="flex flex-col md:flex-row gap-6">
           {renderSidebar()}
-
-          <div className="flex-1">{renderContent()}</div>
+          
+          <div className="flex-1">
+            {renderContent()}
+          </div>
         </div>
       </div>
     </div>

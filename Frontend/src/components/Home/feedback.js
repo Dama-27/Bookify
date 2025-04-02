@@ -1,57 +1,31 @@
 import { Card, CardContent } from "../ui/card";
 import "../../styles/Home.css";
-import { useNavigate } from "react-router-dom";
+import {useNavigate } from "react-router-dom";
 import { useState } from "react";
-import image1 from "../../images/Ellipse 1.png";
-import image2 from "../../images/Ellipse 137.png";
-import image3 from "../../images/Ellipse 138.png";
+import image1 from '../../images/Ellipse 1.png';
+import image2 from '../../images/Ellipse 137.png';
+import image3 from '../../images/Ellipse 138.png';
 
 const Feedback = () => {
-  const isAuthenticated = localStorage.getItem("token");
+  const isAuthenticated = localStorage.getItem('token');
   const navigate = useNavigate();
 
   const handleFeedbackClick = () => {
     if (isAuthenticated) {
-      navigate("/review");
+      navigate('/review');
     } else {
-      navigate("/signupcommon");
+      navigate('/signupcommon');
     }
   };
 
   const [reviews, setReviews] = useState([
-    {
-      id: 1,
-      image: image1,
-      name: "John Doe",
-      email: "user@example.com",
-      comment:
-        "The booking system is incredibly intuitive and has saved me hours of administrative work!",
-      rating: 5,
-    },
-    {
-      id: 2,
-      image: image2,
-      name: "Jane Smith",
-      email: "jane@example.com",
-      comment: "Excellent service and easy to use!",
-      rating: 4,
-    },
-    {
-      id: 3,
-      image: image3,
-      name: "Alice Brown",
-      email: "alice@example.com",
-      comment: "Fast and reliable. Highly recommended!",
-      rating: 5,
-    },
+    { id: 1, image: image1, name: "John Doe", email: "user@example.com", comment: "The booking system is incredibly intuitive and has saved me hours of administrative work!", rating: 5 },
+    { id: 2, image: image2, name: "Jane Smith", email: "jane@example.com", comment: "Excellent service and easy to use!", rating: 4 },
+    { id: 3, image: image3, name: "Alice Brown", email: "alice@example.com", comment: "Fast and reliable. Highly recommended!", rating: 5 }
   ]);
 
   const handleRatingChange = (id, value) => {
-    setReviews(
-      reviews.map((review) =>
-        review.id === id ? { ...review, rating: value } : review
-      )
-    );
+    setReviews(reviews.map(review => review.id === id ? { ...review, rating: value } : review));
   };
 
   return (
@@ -60,11 +34,9 @@ const Feedback = () => {
         <div className="max-w-6xl mx-auto">
           <div className="mb-8">
             <h2 className="text-2xl text-left font-bold mb-2 px-3">
-              Feedback...
-            </h2>
-            <p className="text-gray-600 text-left px-5 py-8">
-              What our users are saying
-              <button
+              Feedback...</h2>
+            <p className="text-gray-600 text-left px-5 py-8">What our users are saying  
+              <button 
                 onClick={handleFeedbackClick}
                 className="bg-teal-400 hover:bg-teal-600 text-white text-sm px-5 py-2 rounded-xl ml-2"
               >
@@ -78,8 +50,8 @@ const Feedback = () => {
                 <CardContent>
                   <div className="flex flex-col items-center text-center">
                     <div className="w-16 h-16 rounded-full mb-4 overflow-hidden">
-                      <img
-                        src={review.image}
+                      <img 
+                        src={review.image} 
                         alt={`${review.name}'s profile`}
                         className="w-full h-full object-cover"
                       />
@@ -98,13 +70,9 @@ const Feedback = () => {
                             onChange={() => handleRatingChange(review.id, star)}
                             className="sr-only"
                           />
-                          <svg
-                            className={`w-8 h-8 cursor-pointer ${
-                              review.rating >= star
-                                ? "text-yellow-400"
-                                : "text-gray-300"
-                            }`}
-                            fill="currentColor"
+                          <svg 
+                            className={`w-8 h-8 cursor-pointer ${review.rating >= star ? "text-yellow-400" : "text-gray-300"}`} 
+                            fill="currentColor" 
                             viewBox="0 0 20 20"
                           >
                             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
@@ -121,6 +89,6 @@ const Feedback = () => {
       </div>
     </section>
   );
-};
+}
 
 export default Feedback;

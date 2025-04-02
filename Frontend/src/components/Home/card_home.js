@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Card, CardContent } from "../ui/card";
-import { FaUser, FaCalendarAlt, FaMoneyBillWave } from "react-icons/fa";
+import { FaUser, FaCalendarAlt, FaMoneyBillWave} from "react-icons/fa";
 import "../../styles/Home.css";
 
 const CardHome = () => {
@@ -11,7 +11,7 @@ const CardHome = () => {
 
   useEffect(() => {
     startAutoSlide();
-
+    
     return () => {
       if (slideInterval.current) {
         clearInterval(slideInterval.current);
@@ -27,14 +27,18 @@ const CardHome = () => {
     if (slideInterval.current) {
       clearInterval(slideInterval.current);
     }
-
+    
     slideInterval.current = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % totalSlides);
     }, slideDelay);
   };
 
+
   return (
+    
     <div className="bg-gray-100">
+      
+      
       <section className="py-12 px-6 shadow-md">
         <div className="max-w-6xl mx-auto md:grid-cols-2 gap-10 items-center w-[95%] h-[90%] rounded-lg bg-gradient-to-r from-teal-100 to-teal-50 p-20">
           <div>
@@ -63,7 +67,7 @@ const CardHome = () => {
                 <Card>
                   <CardContent className="flex items-center space-x-4">
                     <div className="p-3 bg-blue-100 rounded-full">
-                      <FaCalendarAlt className="text-green-500 text-xl" />
+                      <FaCalendarAlt className="text-green-500 text-xl"/>
                     </div>
                     <div>
                       <div className="items-center space-x-2 px-10">
@@ -79,11 +83,11 @@ const CardHome = () => {
                       </div>
                     </div>
                   </CardContent>
-                </Card>
+                </Card>               
                 <Card>
                   <CardContent className="flex items-center space-x-4">
                     <div className="p-3 bg-blue-100 rounded-full">
-                      <FaMoneyBillWave className="text-purple-500 text-xl" />
+                      <FaMoneyBillWave className="text-purple-500 text-xl"/>
                     </div>
                     <div>
                       <div className="items-center space-x-2 px-10">
@@ -106,17 +110,11 @@ const CardHome = () => {
               <Card className="w-full">
                 <CardContent>
                   <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-lg font-semibold">
-                      Client Login in Weekly
-                    </h3>
-                    <span className="text-green-500 text-sm">
-                      +10.5% from last period
-                    </span>
+                    <h3 className="text-lg font-semibold">Client Login in Weekly</h3>
+                    <span className="text-green-500 text-sm">+10.5% from last period</span>
                   </div>
                   <div className="h-64 w-full bg-gray-100 rounded flex items-center justify-center">
-                    <p className="text-gray-500">
-                      Chart visualization would go here
-                    </p>
+                    <p className="text-gray-500">Chart visualization would go here</p>
                   </div>
                 </CardContent>
               </Card>

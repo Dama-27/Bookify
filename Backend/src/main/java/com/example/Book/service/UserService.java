@@ -29,19 +29,16 @@ public class UserService {
     public String registerServiceProvider(ServiceProvider provider) {
         Optional<ServiceProvider> exist = serviceProviderRepository.findByEmail(provider.getEmail());
         if (exist.isPresent()) {
-            throw new RuntimeException("Service Provider already exists!");
+            return "Service Provider already exists!";
         }
-        try {
-            provider.setPassword(passwordEncoder.encode(provider.getPassword()));
-            serviceProviderRepository.save(provider);
-            return "Service Provider registered successfully!";
-        } catch (Exception e) {
-            throw new RuntimeException("Service Provider registration failed: " + e.getMessage());
-        }
+        provider.setPassword(passwordEncoder.encode(provider.getPassword()));
+        serviceProviderRepository.save(provider);
+        return "Service Provider registered successfully!";
     }
 
     // Register Consumer with password hashing
     public String registerConsumer(Consumer consumer) {
+        
         
         Optional<Consumer> exist = consumerRepository.findByEmail(consumer.getEmail());
         if (exist.isPresent()) {
@@ -78,18 +75,9 @@ public class UserService {
         throw new RuntimeException("Invalid email or password!");
     }
 
-    public Optional<?> getUserByEmail(String email) {
-        Optional<Consumer> consumer = consumerRepository.findByEmail(email);
-        if (consumer.isPresent()) {
-            return Optional.of(consumer.get());
-        }
-
-        Optional<ServiceProvider> provider = serviceProviderRepository.findByEmail(email);
-        if (provider.isPresent()) {
-            return Optional.of(provider.get());
-        }
-
-        return Optional.empty();
-
+    // Optional: Role update stub if you want to extend role change logic
+    public boolean updateUserRole(String role) {
+        // Extend logic to update user role in DB if needed
+        return true;
     }
 }

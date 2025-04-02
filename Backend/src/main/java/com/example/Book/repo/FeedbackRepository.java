@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface FeedbackRepository extends JpaRepository<Feedback, Long> {
+
     @Query("SELECT f FROM Feedback f WHERE f.consumer.client_id = :clientId")
     List<Feedback> findByConsumerId(@Param("clientId") Long clientId);
 

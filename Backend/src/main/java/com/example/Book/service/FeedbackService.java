@@ -46,21 +46,24 @@ public class FeedbackService {
         Feedback feedback = new Feedback(consumer, booking, feedbackDTO.getComments(), feedbackDTO.getRating());
         feedbackRepository.save(feedback);
 
-        return new FeedbackDTO(feedback.getConsumer().getClient_id(), feedback.getBooking().getBookingId(),
-                feedback.getComments(), feedback.getRating(), feedback.getResponseDate());
+        return new FeedbackDTO(feedback.getConsumer().getClient_id(), consumer.getUsername(), // Include consumer name
+                feedback.getBooking().getBookingId(), feedback.getComments(),
+                feedback.getRating(), feedback.getResponseDate());
     }
 
     public List<FeedbackDTO> getAllFeedback() {
         return feedbackRepository.findAll().stream().map(feedback ->
-                        new FeedbackDTO(feedback.getConsumer().getClient_id(), feedback.getBooking().getBookingId(),
-                                feedback.getComments(), feedback.getRating(), feedback.getResponseDate()))
+                        new FeedbackDTO(feedback.getConsumer().getClient_id(), feedback.getConsumer().getUsername(), // Include consumer name
+                                feedback.getBooking().getBookingId(), feedback.getComments(),
+                                feedback.getRating(), feedback.getResponseDate()))
                 .collect(Collectors.toList());
     }
 
     public List<FeedbackDTO> getFeedbackByConsumer(Long consumerId) {
         return feedbackRepository.findByConsumerId(consumerId).stream().map(feedback ->
-                        new FeedbackDTO(feedback.getConsumer().getClient_id(), feedback.getBooking().getBookingId(),
-                                feedback.getComments(), feedback.getRating(), feedback.getResponseDate()))
+                        new FeedbackDTO(feedback.getConsumer().getClient_id(), feedback.getConsumer().getUsername(), // Include consumer name
+                                feedback.getBooking().getBookingId(), feedback.getComments(),
+                                feedback.getRating(), feedback.getResponseDate()))
                 .collect(Collectors.toList());
     }
 }

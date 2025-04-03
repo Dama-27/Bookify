@@ -17,15 +17,9 @@ public class Feedback {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long feedbackId;
 
-    // Link to the Consumer (client_id)
     @ManyToOne
-    @JoinColumn(name = "client_id", nullable = false) // Ensure column name matches database
+    @JoinColumn(name = "consumer_id", nullable = false)
     private Consumer consumer;
-
-    // Link to the Booking (booking_id)
-    @ManyToOne
-    @JoinColumn(name = "booking_id", nullable = false) // Ensure column name matches database
-    private Booking booking;
 
     @Column(columnDefinition = "TEXT")
     private String comments;
@@ -35,63 +29,27 @@ public class Feedback {
     @Temporal(TemporalType.TIMESTAMP)
     private Date responseDate = new Date();
 
-    public Feedback() {
-    }
+    public Feedback() {}
 
-    public Feedback(Consumer consumer, Booking booking, String comments, int rating) {
+    public Feedback(Consumer consumer, String comments, int rating) {
         this.consumer = consumer;
-        this.booking = booking;
         this.comments = comments;
         this.rating = rating;
         this.responseDate = new Date();
     }
 
-    // Getters and Setters
-    public Long getFeedbackId() {
-        return feedbackId;
-    }
+    public Long getFeedbackId() { return feedbackId; }
+    public void setFeedbackId(Long feedbackId) { this.feedbackId = feedbackId; }
 
-    public void setFeedbackId(Long feedbackId) {
-        this.feedbackId = feedbackId;
-    }
+    public Consumer getConsumer() { return consumer; }
+    public void setConsumer(Consumer consumer) { this.consumer = consumer; }
 
-    public Consumer getConsumer() {
-        return consumer;
-    }
+    public String getComments() { return comments; }
+    public void setComments(String comments) { this.comments = comments; }
 
-    public void setConsumer(Consumer consumer) {
-        this.consumer = consumer;
-    }
+    public int getRating() { return rating; }
+    public void setRating(int rating) { this.rating = rating; }
 
-    public Booking getBooking() {
-        return booking;
-    }
-
-    public void setBooking(Booking booking) {
-        this.booking = booking;
-    }
-
-    public String getComments() {
-        return comments;
-    }
-
-    public void setComments(String comments) {
-        this.comments = comments;
-    }
-
-    public int getRating() {
-        return rating;
-    }
-
-    public void setRating(int rating) {
-        this.rating = rating;
-    }
-
-    public Date getResponseDate() {
-        return responseDate;
-    }
-
-    public void setResponseDate(Date responseDate) {
-        this.responseDate = responseDate;
-    }
+    public Date getResponseDate() { return responseDate; }
+    public void setResponseDate(Date responseDate) { this.responseDate = responseDate; }
 }

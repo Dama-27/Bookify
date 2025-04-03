@@ -2,14 +2,24 @@ package com.example.Book.controller;
 
 import java.util.List;
 
+
 import com.example.Book.dto.BookingDTO;
 import com.example.Book.dto.ScheduleDTO;
+import com.example.Book.dto.ServiceDateTimeDTO;
 import com.example.Book.model.Booking;
 import com.example.Book.model.Schedule;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 
 import com.example.Book.dto.ServiceProviderDTO;
 import com.example.Book.service.BookingService;
@@ -22,7 +32,11 @@ public class BookingController {
     @Autowired
     private BookingService bookingService;
 
-
+    @GetMapping("/all")
+    public ResponseEntity<List<Booking>> getAllBookings() {
+        List<Booking> bookings = bookingService.getAllBookings();
+        return ResponseEntity.ok(bookings);
+    }
 
     @GetMapping("/providers")
     public ResponseEntity<List<ServiceProviderDTO>> getAllServiceProvidersWithServices() {
@@ -48,5 +62,9 @@ public class BookingController {
         return new ResponseEntity<>(savedSchedule, HttpStatus.CREATED);
     }
 
+    @GetMapping("/service-datetime/{providerId}")
+    public List<ServiceDateTimeDTO> getServiceDateTimesByProviderId(@PathVariable Long providerId) {
+        return bookingService.getServiceDateTimeByProviderId(providerId);
+    }
 
 }

@@ -1,13 +1,19 @@
 package com.example.Book.model;
 
-import jakarta.persistence.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.web.bind.annotation.CrossOrigin;
-
-import java.time.LocalDateTime;
 
 @CrossOrigin(origins = "http://localhost:3000")
 @Entity
@@ -20,10 +26,21 @@ public class ServiceDateTime {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long serviceDateTimeId;
-    private String date;
-    private LocalDateTime startTime;
-    private LocalDateTime EndTime;
-    private Integer duration;
+
+    // Working hours
+    @Column(name = "work_hours_start", nullable = false)
+    private String workHoursStart;
+
+    @Column(name = "work_hours_end", nullable = false)
+    private String workHoursEnd;
+
+    // Working days stored as JSON
+    @Column(name = "working_days", columnDefinition = "json")
+    private String workingDays;
+
+    // Time slots
+    @Column(name = "time_packages", nullable = false)
+    private Integer timePackages = 4;
 
     @ManyToOne
     @JoinColumn(name = "service_id", nullable = false)

@@ -1,18 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from "react";
 import Navigation from "../../../components/ui/navigation";
+import {
+  fetchProviderServices,
+  updateProviderService,
+} from "../../../services/api";
 
 const ServiceDetails = ({ serviceData }) => {
   const [editMode, setEditMode] = useState(false);
   const [formData, setFormData] = useState({
-    providerName: serviceData?.providerName || '',
-    specialty: serviceData?.specialty || '',
-    qualification: serviceData?.qualification || '',
-    contactNumber: serviceData?.contactNumber || '',
-    workplace: serviceData?.workplace || '',
-    address: {
-      clinic: serviceData?.address?.clinic || '',
-      district: serviceData?.address?.district || '',
-      county: serviceData?.address?.county || ''
+    name: serviceData?.name || "",
+    specialization: serviceData?.specialization || "",
+    price: serviceData?.price || 0,
+    description: serviceData?.description || "",
+    category: serviceData?.category || "",
+    workHours: serviceData?.workHours || {
+      start: "08:00",
+      end: "17:00",
     },
     workingDays: serviceData?.workingDays || {
       monday: false,
@@ -21,246 +24,239 @@ const ServiceDetails = ({ serviceData }) => {
       thursday: false,
       friday: false,
       saturday: false,
-      sunday: false
+      sunday: false,
     },
-    workHours: serviceData?.workHours || {
-      start: '08:00',
-      end: '17:00'
-    },
-    timePackages: serviceData?.timePackages || 4
+    timePackages: serviceData?.timePackages || 4,
   });
+
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
+
+  useEffect(() => {
+    loadServiceData();
+  }, []);
+
+  const loadServiceData = async () => {
+    try {
+      const services = await fetchProviderServices();
+      if (services && services.length > 0) {
+        const service = services[0]; // Assuming we're working with the first service
+        setFormData({
+          name: service.name || "",
+          specialization: service.specialization || "",
+          price: service.price || 0,
+          description: service.description || "",
+          category: service.category || "",
+          workHours: {
+            start: service.workHoursStart || "08:00",
+            end: service.workHoursEnd || "17:00",
+          },
+          workingDays: {
+            monday: service.monday || false,
+            tuesday: service.tuesday || false,
+            wednesday: service.wednesday || false,
+            thursday: service.thursday || false,
+            friday: service.friday || false,
+            saturday: service.saturday || false,
+            sunday: service.sunday || false,
+          },
+          timePackages: service.timePackages || 4,
+        });
+      }
+    } catch (error) {
+      setError("Failed to load service data");
+      console.error("Error loading service data:", error);
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
-  const handleAddressChange = (e) => {
+  const handleWorkHoursChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      address: {
-        ...prev.address,
-        [name]: value
-      }
+      workHours: {
+        ...prev.workHours,
+        [name]: value,
+      },
     }));
   };
 
   const handleDayToggle = (day) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       workingDays: {
         ...prev.workingDays,
-        [day]: !prev.workingDays[day]
-      }
+        [day]: !prev.workingDays[day],
+      },
     }));
   };
 
-  const handleTimeChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      workHours: {
-        ...prev.workHours,
-        [name]: value
-      }
-    }));
-  };
-
-  const handleTimePackagesChange = (e) => {
-    const value = parseInt(e.target.value) || 1;
-    setFormData(prev => ({
-      ...prev,
-      timePackages: value
-    }));
-  };
-
-  const handleSave = () => {
-    // Here you would save the updated service data
-    console.log('Saving service details:', formData);
-    setEditMode(false);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await updateProviderService(formData);
+      setSuccess(true);
+      setError(null);
+      setEditMode(false);
+    } catch (error) {
+      setError("Failed to update service details");
+      console.error("Error updating service:", error);
+    }
   };
 
   // Helper function to calculate and display time slot duration
   const calculateTimeSlotDuration = (start, end, packages) => {
-    const [startHour, startMinute] = start.split(':').map(Number);
-    const [endHour, endMinute] = end.split(':').map(Number);
-    
+    const [startHour, startMinute] = start.split(":").map(Number);
+    const [endHour, endMinute] = end.split(":").map(Number);
+
     const startMinutes = startHour * 60 + startMinute;
     const endMinutes = endHour * 60 + endMinute;
     const totalMinutes = endMinutes - startMinutes;
-    
+
     const slotDuration = Math.floor(totalMinutes / packages);
     const hours = Math.floor(slotDuration / 60);
     const minutes = slotDuration % 60;
-    
-    let durationText = '';
+
+    let durationText = "";
     if (hours > 0) {
-      durationText += `${hours} hour${hours > 1 ? 's' : ''}`;
+      durationText += `${hours} hour${hours > 1 ? "s" : ""}`;
     }
     if (minutes > 0) {
-      durationText += `${hours > 0 ? ' and ' : ''}${minutes} minute${minutes > 1 ? 's' : ''}`;
+      durationText += `${hours > 0 ? " and " : ""}${minutes} minute${
+        minutes > 1 ? "s" : ""
+      }`;
     }
-    
+
     return `Each time slot will be ${durationText} long.`;
   };
 
   return (
-    <div className='bg-cyan-100 p-8'>
+    <div className="bg-cyan-100 p-8">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold">Service Details</h2>
         {!editMode ? (
-          <button 
+          <button
             onClick={() => setEditMode(true)}
             className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition"
           >
             Edit Details
           </button>
         ) : (
-          <button 
-            onClick={handleSave}
+          <button
+            onClick={handleSubmit}
             className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 transition"
           >
             Save Changes
           </button>
         )}
       </div>
-      
+
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+          {error}
+        </div>
+      )}
+
+      {success && (
+        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+          Service details updated successfully!
+        </div>
+      )}
+
       <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
         <h3 className="text-lg font-medium mb-4">Provider Information</h3>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           <div>
             <label className="block text-gray-700 mb-1">Provider Name</label>
             {editMode ? (
-              <input 
-                type="text" 
-                name="providerName" 
-                value={formData.providerName} 
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
                 onChange={handleChange}
-                className="w-full border rounded-md p-2" 
+                className="w-full border rounded-md p-2"
               />
             ) : (
-              <p className="py-2">{formData.providerName || 'Not specified'}</p>
+              <p className="py-2">{formData.name || "Not specified"}</p>
             )}
           </div>
-          
+
           <div>
-            <label className="block text-gray-700 mb-1">Specialty/Service</label>
+            <label className="block text-gray-700 mb-1">
+              Specialty/Service
+            </label>
             {editMode ? (
-              <input 
-                type="text" 
-                name="specialty" 
-                value={formData.specialty} 
+              <input
+                type="text"
+                name="specialization"
+                value={formData.specialization}
                 onChange={handleChange}
-                className="w-full border rounded-md p-2" 
+                className="w-full border rounded-md p-2"
               />
             ) : (
-              <p className="py-2">{formData.specialty || 'Not specified'}</p>
+              <p className="py-2">
+                {formData.specialization || "Not specified"}
+              </p>
             )}
           </div>
-          
+
           <div>
-            <label className="block text-gray-700 mb-1">Qualification</label>
+            <label className="block text-gray-700 mb-1">Price</label>
             {editMode ? (
-              <input 
-                type="text" 
-                name="qualification" 
-                value={formData.qualification} 
+              <input
+                type="number"
+                name="price"
+                value={formData.price}
                 onChange={handleChange}
-                className="w-full border rounded-md p-2" 
+                className="w-full border rounded-md p-2"
               />
             ) : (
-              <p className="py-2">{formData.qualification || 'Not specified'}</p>
+              <p className="py-2">{formData.price || "Not specified"}</p>
             )}
           </div>
-          
+
           <div>
-            <label className="block text-gray-700 mb-1">Contact Number</label>
+            <label className="block text-gray-700 mb-1">Description</label>
             {editMode ? (
-              <input 
-                type="text" 
-                name="contactNumber" 
-                value={formData.contactNumber} 
+              <textarea
+                name="description"
+                value={formData.description}
                 onChange={handleChange}
-                className="w-full border rounded-md p-2" 
+                className="w-full border rounded-md p-2"
               />
             ) : (
-              <p className="py-2">{formData.contactNumber || 'Not specified'}</p>
+              <p className="py-2">{formData.description || "Not specified"}</p>
             )}
           </div>
-          
+
           <div>
-            <label className="block text-gray-700 mb-1">Workplace/Hospital</label>
+            <label className="block text-gray-700 mb-1">Category</label>
             {editMode ? (
-              <input 
-                type="text" 
-                name="workplace" 
-                value={formData.workplace} 
+              <input
+                type="text"
+                name="category"
+                value={formData.category}
                 onChange={handleChange}
-                className="w-full border rounded-md p-2" 
+                className="w-full border rounded-md p-2"
               />
             ) : (
-              <p className="py-2">{formData.workplace || 'Not specified'}</p>
-            )}
-          </div>
-        </div>
-        
-        <h3 className="font-medium mb-2">Address Information</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label className="block text-gray-700 mb-1">Clinic/Location</label>
-            {editMode ? (
-              <input 
-                type="text" 
-                name="clinic" 
-                value={formData.address.clinic} 
-                onChange={handleAddressChange}
-                className="w-full border rounded-md p-2" 
-              />
-            ) : (
-              <p className="py-2">{formData.address.clinic || 'Not specified'}</p>
-            )}
-          </div>
-          
-          <div>
-            <label className="block text-gray-700 mb-1">District</label>
-            {editMode ? (
-              <input 
-                type="text" 
-                name="district" 
-                value={formData.address.district} 
-                onChange={handleAddressChange}
-                className="w-full border rounded-md p-2" 
-              />
-            ) : (
-              <p className="py-2">{formData.address.district || 'Not specified'}</p>
-            )}
-          </div>
-          
-          <div>
-            <label className="block text-gray-700 mb-1">County/City</label>
-            {editMode ? (
-              <input 
-                type="text" 
-                name="county" 
-                value={formData.address.county} 
-                onChange={handleAddressChange}
-                className="w-full border rounded-md p-2" 
-              />
-            ) : (
-              <p className="py-2">{formData.address.county || 'Not specified'}</p>
+              <p className="py-2">{formData.category || "Not specified"}</p>
             )}
           </div>
         </div>
       </div>
-      
+
       <div className="bg-white rounded-lg shadow-sm p-6">
         <h3 className="text-lg font-medium mb-4">Availability Settings</h3>
-        
+
         <div className="mb-6">
           <h4 className="font-medium mb-2">Working Days</h4>
           {editMode ? (
@@ -271,9 +267,9 @@ const ServiceDetails = ({ serviceData }) => {
                   onClick={() => handleDayToggle(day)}
                   type="button"
                   className={`py-2 px-3 rounded-md ${
-                    formData.workingDays[day] 
-                      ? 'bg-blue-500 text-white' 
-                      : 'bg-gray-200 text-gray-700'
+                    formData.workingDays[day]
+                      ? "bg-blue-500 text-white"
+                      : "bg-gray-200 text-gray-700"
                   }`}
                 >
                   {day.charAt(0).toUpperCase() + day.slice(1)}
@@ -286,9 +282,9 @@ const ServiceDetails = ({ serviceData }) => {
                 <span
                   key={day}
                   className={`py-2 px-3 rounded-md ${
-                    formData.workingDays[day] 
-                      ? 'bg-blue-500 text-white' 
-                      : 'bg-gray-200 text-gray-700'
+                    formData.workingDays[day]
+                      ? "bg-blue-500 text-white"
+                      : "bg-gray-200 text-gray-700"
                   }`}
                 >
                   {day.charAt(0).toUpperCase() + day.slice(1)}
@@ -297,31 +293,35 @@ const ServiceDetails = ({ serviceData }) => {
             </div>
           )}
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div>
             <h4 className="font-medium mb-2">Working Hours</h4>
             {editMode ? (
               <div className="flex items-center gap-2">
                 <div>
-                  <label className="block text-gray-700 text-sm mb-1">Start Time</label>
-                  <input 
-                    type="time" 
-                    name="start" 
-                    value={formData.workHours.start} 
-                    onChange={handleTimeChange}
-                    className="border rounded-md p-2" 
+                  <label className="block text-gray-700 text-sm mb-1">
+                    Start Time
+                  </label>
+                  <input
+                    type="time"
+                    name="start"
+                    value={formData.workHours.start}
+                    onChange={handleWorkHoursChange}
+                    className="border rounded-md p-2"
                   />
                 </div>
                 <span className="mt-6">to</span>
                 <div>
-                  <label className="block text-gray-700 text-sm mb-1">End Time</label>
-                  <input 
-                    type="time" 
-                    name="end" 
-                    value={formData.workHours.end} 
-                    onChange={handleTimeChange}
-                    className="border rounded-md p-2" 
+                  <label className="block text-gray-700 text-sm mb-1">
+                    End Time
+                  </label>
+                  <input
+                    type="time"
+                    name="end"
+                    value={formData.workHours.end}
+                    onChange={handleWorkHoursChange}
+                    className="border rounded-md p-2"
                   />
                 </div>
               </div>
@@ -331,19 +331,21 @@ const ServiceDetails = ({ serviceData }) => {
               </p>
             )}
           </div>
-          
+
           <div>
             <h4 className="font-medium mb-2">Time Slots</h4>
             {editMode ? (
               <div>
-                <label className="block text-gray-700 text-sm mb-1">Number of Time Slots</label>
-                <input 
-                  type="number" 
-                  min="1" 
-                  max="12" 
-                  value={formData.timePackages} 
-                  onChange={handleTimePackagesChange}
-                  className="border rounded-md p-2 w-full" 
+                <label className="block text-gray-700 text-sm mb-1">
+                  Number of Time Slots
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  max="12"
+                  value={formData.timePackages}
+                  onChange={handleChange}
+                  className="border rounded-md p-2 w-full"
                 />
               </div>
             ) : (
@@ -353,14 +355,18 @@ const ServiceDetails = ({ serviceData }) => {
             )}
           </div>
         </div>
-        
+
         <div className="bg-blue-50 p-4 rounded-md">
           <h4 className="font-medium mb-2">Time Slot Summary</h4>
           <p className="text-sm text-gray-700">
             Working hours: {formData.workHours.start} - {formData.workHours.end}
           </p>
           <p className="text-sm text-gray-700">
-            {calculateTimeSlotDuration(formData.workHours.start, formData.workHours.end, formData.timePackages)}
+            {calculateTimeSlotDuration(
+              formData.workHours.start,
+              formData.workHours.end,
+              formData.timePackages
+            )}
           </p>
         </div>
       </div>

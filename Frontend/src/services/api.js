@@ -275,8 +275,13 @@ export const getUserRole = () => {
 
 // Helper function to get auth header
 export const getAuthHeader = () => {
-  const token = localStorage.getItem("token");
-  return token ? { Authorization: `Bearer ${token}` } : {};
+  try {
+    const token = getCleanToken();
+    return { Authorization: `Bearer ${token}` };
+  } catch (error) {
+    console.error("Error getting auth header:", error);
+    return {};
+  }
 };
 
 // Test connection to backend
@@ -598,5 +603,90 @@ export const fetchServiceProviderProfile = async () => {
   } catch (error) {
     console.error("Error fetching service provider profile:", error);
     throw error;
+  }
+};
+
+// Service Management APIs
+export const fetchProviderServices = async () => {
+  try {
+    const token = getCleanToken();
+    const response = await fetch(`${BASE_URL}api/service-providers/services`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      if (response.status === 401 || response.status === 403) {
+        return handleAuthError(new Error("Authentication failed"));
+      }
+      throw new Error(`Failed to fetch services (${response.status})`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching provider services:", error);
+    throw error;
+  }
+};
+
+export const updateProviderService = async (serviceData) => {
+  try {
+    const token = getCleanToken();
+    const response = await fetch(`${BASE_URL}api/service-providers/services`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(serviceData),
+    });
+
+    if (!response.ok) {
+      if (response.status === 401 || response.status === 403) {
+        return handleAuthError(new Error("Authentication failed"));
+      }
+      throw new Error(`Failed to update service (${response.status})`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error updating provider service:", error);
+    throw error;
+  }
+};
+
+export const resetPassword = async (email, oldPassword, newPassword) => {
+  try {
+    const authHeader = getAuthHeader();
+
+    const response = await fetch(`${BASE_URL}auth/reset-password`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...authHeader,
+        Accept: "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        email,
+        oldPassword,
+        newPassword,
+      }),
+    });
+
+    // Use the existing handleResponse helper
+    const data = await handleResponse(response);
+    return data.message || "Password updated successfully";
+  } catch (error) {
+    console.error("Password reset error:", error);
+    // Use error message from response or fallback
+    throw new Error(error.message || "Failed to reset password");
   }
 };

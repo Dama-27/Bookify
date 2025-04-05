@@ -17,13 +17,13 @@ import com.example.Book.repo.ServiceProviderRepository;
 public class UserService {
 
     @Autowired
-    private ServiceProviderRepository serviceProviderRepository;
+    public ServiceProviderRepository serviceProviderRepository;
 
     @Autowired
-    private ConsumerRepository consumerRepository;
+    public ConsumerRepository consumerRepository;
 
     @Autowired
-    private JWTService jwtService;
+    public JWTService jwtService;
 
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 

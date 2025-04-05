@@ -17,7 +17,7 @@ import com.example.Book.model.ServiceProvider;
 import com.example.Book.repo.ServiceProviderRepository;
 import com.example.Book.service.JWTService;
 
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "http://localhost:3001")
 @RestController
 @RequestMapping("/api/service-providers")
 public class ServiceProviderController {

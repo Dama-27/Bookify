@@ -17,7 +17,7 @@ import com.example.Book.repo.ConsumerRepository;
 import com.example.Book.repo.ServiceProviderRepository;
 import com.example.Book.service.JWTService;
 
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "http://localhost:3001")
 @RestController
 @RequestMapping("/api/users")
 public class UserController {

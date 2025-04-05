@@ -15,7 +15,7 @@ import com.example.Book.model.ServiceProvider;
 import com.example.Book.service.UserService;
 
 
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "http://localhost:3001")
 @RestController
 @RequestMapping("/auth")
 public class AuthController {

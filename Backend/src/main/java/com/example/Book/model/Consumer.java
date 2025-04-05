@@ -77,5 +77,7 @@ public class Consumer {
     @jakarta.persistence.PreUpdate
     protected void onUpdate() {
         updatedAt = java.time.LocalDateTime.now();
+    public Long getClientId() {
+        return client_id;
     }
 }

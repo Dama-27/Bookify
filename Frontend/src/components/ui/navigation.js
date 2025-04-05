@@ -18,6 +18,7 @@ const Navigation = () => {
           username: "",
           profilePhoto: "",
           role: "",
+          id: "",
         };
   });
 
@@ -58,7 +59,7 @@ const Navigation = () => {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("userInfo");
-    setUserData({ username: "", profilePhoto: "", role: "" });
+    setUserData({ username: "", profilePhoto: "", role: "" , id: ""});
     setIsAuthenticated(false);
     navigate("/");
   };

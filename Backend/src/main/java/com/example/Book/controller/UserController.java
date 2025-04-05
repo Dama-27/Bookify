@@ -43,7 +43,8 @@ public class UserController {
             if (consumer.isPresent()) {
                 return ResponseEntity.ok(Map.of(
                     "username", consumer.get().getUsername(),
-                    "role", "consumer"
+                    "role", "consumer",
+                     "id", consumer.get().getClientId()
                 ));
             }
 

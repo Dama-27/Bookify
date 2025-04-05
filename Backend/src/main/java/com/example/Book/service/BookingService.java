@@ -80,7 +80,9 @@ public class BookingService {
                 provider.getExperience(),
                 provider.getIsActive(),
                 serviceDTOs,
-                provider.getProfileImage()  // Add the image parameter
+                provider.getProfileImage(),  // Add the image parameter
+                provider.getFirstName(),
+                provider.getLastName()
         );
     }
 
@@ -166,5 +168,14 @@ public class BookingService {
 
     public List<ServiceDateTimeDTO> getServiceDateTimeByProviderId(Long providerId) {
         return serviceDateTimeRepository.findByProviderId(providerId);
+    }
+
+    public ServiceProviderDTO getServiceProviderDetailsById(Long providerId) {
+        // Fetch the service provider from the repository
+        ServiceProvider provider = serviceProviderRepository.findById(providerId)
+                .orElseThrow(() -> new RuntimeException("Service Provider not found with id: " + providerId));
+
+        // Convert the provider and its associated services to a DTO
+        return convertToServiceProviderDTO(provider);
     }
 }

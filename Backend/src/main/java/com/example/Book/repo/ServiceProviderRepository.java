@@ -12,4 +12,6 @@ public interface ServiceProviderRepository extends JpaRepository<ServiceProvider
 
 
     Optional <ServiceProvider> findByEmail(String email);
+
+    Optional<ServiceProvider> findById(Long providerId);
 }

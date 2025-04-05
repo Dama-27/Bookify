@@ -60,6 +60,7 @@ public class AuthController {
             formattedResponse.put("token", "Bearer " + response.get("token"));
             formattedResponse.put("user", response.get("userData"));
             formattedResponse.put("role", response.get("role"));
+            formattedResponse.put("client_id", response.get("client_id"));
 
             return ResponseEntity.ok(formattedResponse);
         } catch (Exception e) {

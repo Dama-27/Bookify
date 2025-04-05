@@ -15,16 +15,17 @@ import java.util.Optional;
 
 @Service
 public class UserService {
+
     @Autowired
-    private ConsumerRepository consumerRepository;
-    
+    public ServiceProviderRepository serviceProviderRepository;
+
     @Autowired
-    private ServiceProviderRepository serviceProviderRepository;
-    
+    public ConsumerRepository consumerRepository;
+
     @Autowired
-    private JWTService jwtService;
-    
-    private final BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
+    public JWTService jwtService;
+
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     // Register Service Provider with password hashing
     public String registerServiceProvider(ServiceProvider provider) {

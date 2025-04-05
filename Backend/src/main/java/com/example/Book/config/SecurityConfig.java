@@ -37,7 +37,12 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/consumer/auth/**", "/auth/**").permitAll()
-                .anyRequest().authenticated()
+                .requestMatchers("/api/auth/**", "/auth/**").permitAll()
+                .requestMatchers("/uploads/**", "/default-avatar.png").permitAll()
+                .requestMatchers("/api/booking/providers", "/api/booking/providers/**").permitAll()
+                .requestMatchers("/images/**").permitAll()
+                //.anyRequest().authenticated()
+                    .anyRequest().permitAll()
             )
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)

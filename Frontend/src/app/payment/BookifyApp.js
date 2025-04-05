@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navigation from "../../components/ui/navigation";
+import image1 from "../../images/2.png";
 
 // BookingForm Component
 const BookingForm = ({ bookingDetails, onSelectPaymentMethod }) => {
@@ -16,20 +17,13 @@ const BookingForm = ({ bookingDetails, onSelectPaymentMethod }) => {
             <span className="font-medium w-32">Doctor Name:</span>
             <span>{bookingDetails.doctorName}</span>
           </div>
-          <div className="flex">
-            <span className="font-medium w-32">Doctor ID:</span>
-            <span>{bookingDetails.doctorId}</span>
-          </div>
-          <div className="flex">
-            <span className="font-medium w-32">Degree:</span>
-            <span>{bookingDetails.degree}</span>
-          </div>
+          
           <div className="flex">
             <span className="font-medium w-32">Qualification:</span>
             <span>{bookingDetails.qualification}</span>
           </div>
           <div className="flex">
-            <span className="font-medium w-32">Service Area:</span>
+            <span className="font-medium w-32">Address:</span>
             <span>{bookingDetails.serviceArea}</span>
           </div>
         </div>
@@ -87,11 +81,11 @@ const CardPayment = ({ cardDetails, onBack, onComplete, amount }) => {
   return (
     <div className="grid md:grid-cols-2 gap-8">
       {/* Left Column - Image */}
-      <div className="flex items-center justify-center">
+      <div className="w-full md:w-1/2 p-4 flex flex-col items-center">
         <div className="w-full max-w-md">
           <img 
-            src="/api/placeholder/400/300" 
-            alt="Doctor booking on laptop" 
+            src={image1} 
+            alt="Payment illustration"
             className="rounded-lg shadow-md"
           />
         </div>
@@ -234,8 +228,8 @@ const CashPayment = ({ onBack, onComplete, amount }) => {
       <div className="flex items-center justify-center">
         <div className="w-full max-w-md">
           <img 
-            src="/api/placeholder/400/300" 
-            alt="Doctor booking on laptop" 
+            src="/api/placeholder/600/500" 
+            alt={image1}
             className="rounded-lg shadow-md"
           />
         </div>
@@ -342,12 +336,11 @@ const BookifyApp = () => {
   const [currentStep, setCurrentStep] = useState('booking');
   const [paymentMethod, setPaymentMethod] = useState(null);
   const [bookingDetails, setBookingDetails] = useState({
-    doctorName: 'Dr. Sarah Johnson',
-    doctorId: 'DOC2023456',
-    degree: 'MD',
-    qualification: 'Cardiologist',
-    serviceArea: 'Central Hospital',
-    amount: '$150'
+    doctorName: 'Dr. John Smith',
+    doctorId: '1',
+    qualification: 'Doctor',
+    serviceArea: '123 Main St',
+    amount: '$50'
   });
   const [cardDetails, setCardDetails] = useState({
     cardNumber: '',

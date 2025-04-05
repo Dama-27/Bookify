@@ -1,7 +1,12 @@
 package com.example.Book.controller;
 
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +25,7 @@ import com.example.Book.model.Services;
 import com.example.Book.repo.ServiceDateTimeRepository;
 import com.example.Book.repo.ServiceProviderRepository;
 import com.example.Book.repo.ServiceRepository;
+import com.example.Book.service.JWTService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -37,21 +43,60 @@ public class ServiceController {
     @Autowired
     private ServiceDateTimeRepository serviceDateTimeRepository;
 
+    @Autowired
+    private JWTService jwtService;
+
+    private final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+
     @GetMapping("/services")
-    public ResponseEntity<List<Services>> getProviderServices(@RequestHeader("Authorization") String token) {
-        Long providerId = extractProviderIdFromToken(token);
-        ServiceProvider provider = serviceProviderRepository.findById(providerId)
+    public ResponseEntity<List<Map<String, Object>>> getProviderServices(@RequestHeader("Authorization") String token) {
+        String email = extractEmailFromToken(token);
+        ServiceProvider provider = serviceProviderRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Provider not found"));
         
         List<Services> services = serviceRepository.findByProvider(provider);
-        return ResponseEntity.ok(services);
+        
+        // Convert services to include ServiceDateTime information
+        List<Map<String, Object>> servicesWithDateTime = services.stream().map(service -> {
+            Map<String, Object> serviceMap = new HashMap<>();
+            serviceMap.put("serviceId", service.getServiceId());
+            serviceMap.put("name", service.getName());
+            serviceMap.put("specialization", service.getSpecialization());
+            serviceMap.put("price", service.getPrice());
+            serviceMap.put("description", service.getDescription());
+            serviceMap.put("category", service.getCategory());
+            
+            // Get ServiceDateTime information
+            ServiceDateTime serviceDateTime = serviceDateTimeRepository.findByServices(service)
+                    .orElse(null);
+            
+            if (serviceDateTime != null) {
+                serviceMap.put("workHours", Map.of(
+                    "start", serviceDateTime.getWorkHoursStart().toLocalTime().format(timeFormatter),
+                    "end", serviceDateTime.getWorkHoursEnd().toLocalTime().format(timeFormatter)
+                ));
+                
+                try {
+                    serviceMap.put("workingDays", new ObjectMapper().readValue(
+                        serviceDateTime.getWorkingDays(), Map.class));
+                } catch (JsonProcessingException e) {
+                    serviceMap.put("workingDays", new HashMap<>());
+                }
+                
+                serviceMap.put("timePackages", serviceDateTime.getTimePackages());
+            }
+            
+            return serviceMap;
+        }).collect(Collectors.toList());
+        
+        return ResponseEntity.ok(servicesWithDateTime);
     }
 
     @PostMapping("/services")
     public ResponseEntity<Services> createService(@RequestBody Map<String, Object> serviceData,
                                                 @RequestHeader("Authorization") String token) {
-        Long providerId = extractProviderIdFromToken(token);
-        ServiceProvider provider = serviceProviderRepository.findById(providerId)
+        String email = extractEmailFromToken(token);
+        ServiceProvider provider = serviceProviderRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Provider not found"));
 
         // Create and save the service
@@ -71,8 +116,16 @@ public class ServiceController {
 
         @SuppressWarnings("unchecked")
         Map<String, String> workHours = (Map<String, String>) serviceData.get("workHours");
-        serviceDateTime.setWorkHoursStart(workHours.get("start"));
-        serviceDateTime.setWorkHoursEnd(workHours.get("end"));
+        
+        // Convert time strings to LocalDateTime with today's date
+        LocalTime startTime = LocalTime.parse(workHours.get("start"), timeFormatter);
+        LocalTime endTime = LocalTime.parse(workHours.get("end"), timeFormatter);
+        
+        LocalDateTime startDateTime = LocalDateTime.now().with(startTime);
+        LocalDateTime endDateTime = LocalDateTime.now().with(endTime);
+        
+        serviceDateTime.setWorkHoursStart(startDateTime);
+        serviceDateTime.setWorkHoursEnd(endDateTime);
         
         @SuppressWarnings("unchecked")
         Map<String, Boolean> workingDays = (Map<String, Boolean>) serviceData.get("workingDays");
@@ -82,7 +135,21 @@ public class ServiceController {
             throw new RuntimeException("Error processing working days", e);
         }
         
-        serviceDateTime.setTimePackages((Integer) serviceData.get("timePackages"));
+        // Set timePackages with default value of 4 if not provided
+        Object timePackagesObj = serviceData.get("timePackages");
+        if (timePackagesObj != null) {
+            if (timePackagesObj instanceof String) {
+                serviceDateTime.setTimePackages(Integer.parseInt((String) timePackagesObj));
+            } else if (timePackagesObj instanceof Integer) {
+                serviceDateTime.setTimePackages((Integer) timePackagesObj);
+            } else if (timePackagesObj instanceof Number) {
+                serviceDateTime.setTimePackages(((Number) timePackagesObj).intValue());
+            } else {
+                serviceDateTime.setTimePackages(4); // Default value if type is unknown
+            }
+        } else {
+            serviceDateTime.setTimePackages(4); // Default value
+        }
         
         serviceDateTimeRepository.save(serviceDateTime);
 
@@ -92,8 +159,8 @@ public class ServiceController {
     @PutMapping("/services")
     public ResponseEntity<Services> updateService(@RequestBody Map<String, Object> serviceData,
                                                 @RequestHeader("Authorization") String token) {
-        Long providerId = extractProviderIdFromToken(token);
-        ServiceProvider provider = serviceProviderRepository.findById(providerId)
+        String email = extractEmailFromToken(token);
+        ServiceProvider provider = serviceProviderRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Provider not found"));
 
         // Find existing service for this provider
@@ -120,8 +187,16 @@ public class ServiceController {
 
         @SuppressWarnings("unchecked")
         Map<String, String> workHours = (Map<String, String>) serviceData.get("workHours");
-        serviceDateTime.setWorkHoursStart(workHours.get("start"));
-        serviceDateTime.setWorkHoursEnd(workHours.get("end"));
+        
+        // Convert time strings to LocalDateTime with today's date
+        LocalTime startTime = LocalTime.parse(workHours.get("start"), timeFormatter);
+        LocalTime endTime = LocalTime.parse(workHours.get("end"), timeFormatter);
+        
+        LocalDateTime startDateTime = LocalDateTime.now().with(startTime);
+        LocalDateTime endDateTime = LocalDateTime.now().with(endTime);
+        
+        serviceDateTime.setWorkHoursStart(startDateTime);
+        serviceDateTime.setWorkHoursEnd(endDateTime);
         
         @SuppressWarnings("unchecked")
         Map<String, Boolean> workingDays = (Map<String, Boolean>) serviceData.get("workingDays");
@@ -131,15 +206,41 @@ public class ServiceController {
             throw new RuntimeException("Error processing working days", e);
         }
         
-        serviceDateTime.setTimePackages((Integer) serviceData.get("timePackages"));
+        // Set timePackages with default value of 4 if not provided
+        Object timePackagesObj = serviceData.get("timePackages");
+        if (timePackagesObj != null) {
+            if (timePackagesObj instanceof String) {
+                serviceDateTime.setTimePackages(Integer.parseInt((String) timePackagesObj));
+            } else if (timePackagesObj instanceof Integer) {
+                serviceDateTime.setTimePackages((Integer) timePackagesObj);
+            } else if (timePackagesObj instanceof Number) {
+                serviceDateTime.setTimePackages(((Number) timePackagesObj).intValue());
+            } else {
+                serviceDateTime.setTimePackages(4); // Default value if type is unknown
+            }
+        } else {
+            serviceDateTime.setTimePackages(4); // Default value
+        }
         
         serviceDateTimeRepository.save(serviceDateTime);
 
         return ResponseEntity.ok(savedService);
     }
 
-    private Long extractProviderIdFromToken(String token) {
-        // Implement token extraction logic here
-        return 1L; // Replace with actual provider ID from token
+    private String extractEmailFromToken(String token) {
+        if (token == null || token.isEmpty()) {
+            throw new RuntimeException("No authorization token provided");
+        }
+
+        // Remove "Bearer " prefix if present
+        String actualToken = token.startsWith("Bearer ") ? token.substring(7) : token;
+        
+        // Extract email from token
+        String email = jwtService.extractUserName(actualToken);
+        if (email == null || email.isEmpty()) {
+            throw new RuntimeException("Invalid token: Could not extract email");
+        }
+        
+        return email;
     }
 } 

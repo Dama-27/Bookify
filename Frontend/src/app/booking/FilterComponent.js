@@ -1,147 +1,129 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
-const FilterComponent = () => {
-  const [filters, setFilters] = useState({
-    category: 'All',
-    rating: 0,
-    price: [0, 500],
-    availability: 'Any',
-    distance: 50
-  });
+const CommonCategoryView = () => {
+  const [providers, setProviders] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6;
 
-  const handleCategoryChange = (category) => {
-    setFilters({...filters, category});
-  };
+  useEffect(() => {
+    fetch("http://localhost:8081/api/booking/providers")
+      .then((response) => response.json())
+      .then((data) => {
+        const filteredProviders = data
+          .filter((provider) =>
+            provider.services.some(
+              (service) => service.category === "Fitness Coach"
+            )
+          )
+          .map((provider) => ({
+            id: provider.providerId,
+            firstName: provider.firstName,
+            lastName: provider.lastName,
+            specialization:
+              provider.services[0]?.specialization || "No Service",
+            image:
+              provider.profileImage ||
+              `https://via.placeholder.com/48?text=${provider.username.charAt(
+                0
+              )}`,
+          }));
 
-  const handleRatingChange = (rating) => {
-    setFilters({...filters, rating});
-  };
+        setProviders(filteredProviders);
+      })
+      .catch((error) => console.error("Error fetching providers:", error));
+  }, []);
 
-  const handlePriceChange = (price) => {
-    setFilters({...filters, price});
-  };
-
-  const handleAvailabilityChange = (availability) => {
-    setFilters({...filters, availability});
-  };
-
-  const handleDistanceChange = (e) => {
-    setFilters({...filters, distance: parseInt(e.target.value)});
-  };
-
-  const categories = ['All', 'Doctor', 'Teacher', 'Fitness Coach', 'Other'];
-  const ratings = [5, 4, 3, 2, 1];
-  const availabilityOptions = ['Any', 'Today', 'This Week', 'Next Week', 'Weekend'];
+  const totalPages = Math.ceil(providers.length / itemsPerPage);
+  const currentProviders = providers.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   return (
     <div className="bg-blue-50 rounded-3xl p-8">
-      <h3 className="text-lg font-medium mb-6">Filter Options</h3>
-      
-      <div className="bg-white rounded-lg p-6 border border-gray-100">
-        {/* Categories */}
-        <div className="mb-6">
-          <h4 className="font-medium mb-3">Category</h4>
-          <div className="flex flex-wrap gap-2">
-            {categories.map(category => (
-              <button
-                key={category}
-                className={`px-3 py-1 rounded-full text-sm ${
-                  filters.category === category 
-                    ? 'bg-cyan-400 text-white' 
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-                onClick={() => handleCategoryChange(category)}
+      <h3 className="text-2xl font-semibold mb-6 text-gray-800">
+        Available Doctors
+      </h3>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {currentProviders.map((provider) => (
+          <div
+            key={provider.id}
+            className="bg-white rounded-xl shadow-md p-6 flex flex-col items-center text-center hover:shadow-lg transition-shadow"
+          >
+            <div className="w-20 h-20 rounded-full overflow-hidden mb-4 border-4 border-cyan-100">
+              <img
+                src={provider.image}
+                alt={`${provider.firstName} ${provider.lastName}`}
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <h4 className="text-lg font-semibold text-gray-800">
+              {provider.firstName} {provider.lastName}
+            </h4>
+            <p className="text-gray-600 text-sm mb-4">
+              {provider.specialization}
+            </p>
+            <Link
+              to={`/clientbookingpage?provider=${provider.id}`}
+              className="bg-cyan-400 text-white px-5 py-2 rounded-full text-sm hover:bg-cyan-500 transition-colors flex items-center gap-2"
+            >
+              Book Now
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
               >
-                {category}
-              </button>
-            ))}
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M14 5l7 7m0 0l-7 7m7-7H3"
+                />
+              </svg>
+            </Link>
           </div>
-        </div>
-        
-        {/* Rating */}
-        <div className="mb-6">
-          <h4 className="font-medium mb-3">Minimum Rating</h4>
-          <div className="flex gap-2">
-            {ratings.map(rating => (
-              <button
-                key={rating}
-                className={`w-10 h-10 flex items-center justify-center rounded-md ${
-                  filters.rating >= rating 
-                    ? 'bg-cyan-400 text-white' 
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-                onClick={() => handleRatingChange(rating)}
-              >
-                {rating}
-              </button>
-            ))}
-          </div>
-        </div>
-        
-        {/* Price Range */}
-        <div className="mb-6">
-          <h4 className="font-medium mb-3">Price Range</h4>
-          <div className="flex items-center gap-4">
-            <span className="text-gray-600">${filters.price[0]}</span>
-            <input
-              type="range"
-              min="0"
-              max="500"
-              value={filters.price[1]}
-              onChange={(e) => handlePriceChange([filters.price[0], parseInt(e.target.value)])}
-              className="w-full h-2 bg-blue-100 rounded-lg appearance-none cursor-pointer"
-            />
-            <span className="text-gray-600">${filters.price[1]}</span>
-          </div>
-        </div>
-        
-        {/* Availability */}
-        <div className="mb-6">
-          <h4 className="font-medium mb-3">Availability</h4>
-          <div className="flex flex-wrap gap-2">
-            {availabilityOptions.map(option => (
-              <button
-                key={option}
-                className={`px-3 py-1 rounded-full text-sm ${
-                  filters.availability === option 
-                    ? 'bg-cyan-400 text-white' 
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-                onClick={() => handleAvailabilityChange(option)}
-              >
-                {option}
-              </button>
-            ))}
-          </div>
-        </div>
-        
-        {/* Distance */}
-        <div className="mb-6">
-          <h4 className="font-medium mb-3">Distance (miles): {filters.distance}</h4>
-          <input
-            type="range"
-            min="1"
-            max="100"
-            value={filters.distance}
-            onChange={handleDistanceChange}
-            className="w-full h-2 bg-blue-100 rounded-lg appearance-none cursor-pointer"
-          />
-          <div className="flex justify-between text-xs text-gray-500 mt-1">
-            <span>1</span>
-            <span>25</span>
-            <span>50</span>
-            <span>75</span>
-            <span>100</span>
-          </div>
-        </div>
-        
-        {/* Apply Filters Button */}
-        <button className="w-full bg-cyan-400 text-white py-2 rounded-md hover:bg-cyan-500 transition">
-          Apply Filters
-        </button>
+        ))}
       </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex justify-center mt-6 gap-2">
+          {currentPage > 1 && (
+            <button
+              onClick={() => setCurrentPage(currentPage - 1)}
+              className="bg-gray-300 px-4 py-2 rounded-l-lg"
+            >
+              Previous
+            </button>
+          )}
+          {Array.from({ length: totalPages }, (_, index) => (
+            <button
+              key={index + 1}
+              onClick={() => setCurrentPage(index + 1)}
+              className={`px-4 py-2 ${
+                currentPage === index + 1
+                  ? "bg-cyan-500 text-white"
+                  : "bg-gray-300"
+              } rounded-md`}
+            >
+              {index + 1}
+            </button>
+          ))}
+          {currentPage < totalPages && (
+            <button
+              onClick={() => setCurrentPage(currentPage + 1)}
+              className="bg-gray-300 px-4 py-2 rounded-r-lg"
+            >
+              Next
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 };
 
-export default FilterComponent;
+export default CommonCategoryView;

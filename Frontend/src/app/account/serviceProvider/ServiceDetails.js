@@ -32,6 +32,24 @@ const ServiceDetails = ({ serviceData }) => {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
 
+  // Add ordered days array
+  const orderedDays = [
+    { key: "monday", label: "Monday" },
+    { key: "tuesday", label: "Tuesday" },
+    { key: "wednesday", label: "Wednesday" },
+    { key: "thursday", label: "Thursday" },
+    { key: "friday", label: "Friday" },
+    { key: "saturday", label: "Saturday" },
+    { key: "sunday", label: "Sunday" },
+  ];
+
+  // Add category options
+  const categoryOptions = [
+    { value: "Doctor", label: "Doctor" },
+    { value: "Teacher", label: "Teacher" },
+    { value: "Fitness Coach", label: "Fitness Coach" },
+  ];
+
   useEffect(() => {
     loadServiceData();
   }, []);
@@ -47,18 +65,18 @@ const ServiceDetails = ({ serviceData }) => {
           price: service.price || 0,
           description: service.description || "",
           category: service.category || "",
-          workHours: {
-            start: service.workHoursStart || "08:00",
-            end: service.workHoursEnd || "17:00",
+          workHours: service.workHours || {
+            start: "08:00",
+            end: "17:00",
           },
-          workingDays: {
-            monday: service.monday || false,
-            tuesday: service.tuesday || false,
-            wednesday: service.wednesday || false,
-            thursday: service.thursday || false,
-            friday: service.friday || false,
-            saturday: service.saturday || false,
-            sunday: service.sunday || false,
+          workingDays: service.workingDays || {
+            monday: false,
+            tuesday: false,
+            wednesday: false,
+            thursday: false,
+            friday: false,
+            saturday: false,
+            sunday: false,
           },
           timePackages: service.timePackages || 4,
         });
@@ -240,13 +258,18 @@ const ServiceDetails = ({ serviceData }) => {
           <div>
             <label className="block text-gray-700 mb-1">Category</label>
             {editMode ? (
-              <input
-                type="text"
+              <select
                 name="category"
                 value={formData.category}
                 onChange={handleChange}
                 className="w-full border rounded-md p-2"
-              />
+              >
+                {categoryOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
             ) : (
               <p className="py-2">{formData.category || "Not specified"}</p>
             )}
@@ -261,33 +284,33 @@ const ServiceDetails = ({ serviceData }) => {
           <h4 className="font-medium mb-2">Working Days</h4>
           {editMode ? (
             <div className="flex flex-wrap gap-2">
-              {Object.keys(formData.workingDays).map((day) => (
+              {orderedDays.map(({ key, label }) => (
                 <button
-                  key={day}
-                  onClick={() => handleDayToggle(day)}
+                  key={key}
+                  onClick={() => handleDayToggle(key)}
                   type="button"
                   className={`py-2 px-3 rounded-md ${
-                    formData.workingDays[day]
+                    formData.workingDays[key]
                       ? "bg-blue-500 text-white"
                       : "bg-gray-200 text-gray-700"
                   }`}
                 >
-                  {day.charAt(0).toUpperCase() + day.slice(1)}
+                  {label}
                 </button>
               ))}
             </div>
           ) : (
             <div className="flex flex-wrap gap-2">
-              {Object.keys(formData.workingDays).map((day) => (
+              {orderedDays.map(({ key, label }) => (
                 <span
-                  key={day}
+                  key={key}
                   className={`py-2 px-3 rounded-md ${
-                    formData.workingDays[day]
+                    formData.workingDays[key]
                       ? "bg-blue-500 text-white"
                       : "bg-gray-200 text-gray-700"
                   }`}
                 >
-                  {day.charAt(0).toUpperCase() + day.slice(1)}
+                  {label}
                 </span>
               ))}
             </div>
@@ -341,6 +364,7 @@ const ServiceDetails = ({ serviceData }) => {
                 </label>
                 <input
                   type="number"
+                  name="timePackages"
                   min="1"
                   max="12"
                   value={formData.timePackages}

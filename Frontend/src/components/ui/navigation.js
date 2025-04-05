@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
-import Button from "../../components/ui/button";
-import "../../styles/Home.css";
-import { Link, useNavigate } from "react-router-dom";
+import Button from "./button";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import image3 from "../../images/Frame 1321314484.png";
 import { fetchUserProfile } from "../../services/api";
 
@@ -22,7 +21,10 @@ const Navigation = () => {
         };
   });
 
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const loadUserProfile = async () => {
@@ -79,30 +81,58 @@ const Navigation = () => {
             </span>
           </div>
           <div className="hidden md:flex space-x-6">
-            <Link to="/" className="text-blue-500 font-medium">
+            <Link
+              to="/"
+              className={`text-gray-700 font-medium px-3 py-2 rounded-md transition-all duration-200 
+                ${
+                  location.pathname === "/"
+                    ? "bg-cyan-400 text-blue-700"
+                    : "hover:text-blue-600 hover:bg-blue-50 active:bg-cyan-400"
+                }`}
+            >
               Home
             </Link>
             <Link
               to="/review"
-              className="text-gray-600 hover:text-blue-500 transition-colors"
+              className={`text-gray-700 font-medium px-3 py-2 rounded-md transition-all duration-50 
+                ${
+                  location.pathname === "/review"
+                    ? "bg-cyan-400 text-blue-700"
+                    : "hover:text-blue-600 hover:bg-blue-50 active:bg-cyan-400"
+                }`}
             >
               Review
             </Link>
             <Link
               to="/community"
-              className="text-gray-600 hover:text-blue-500 transition-colors"
+              className={`text-gray-700 font-medium px-3 py-2 rounded-md transition-all duration-50 
+                ${
+                  location.pathname === "/community"
+                    ? "bg-cyan-400 text-blue-700"
+                    : "hover:text-blue-600 hover:bg-blue-50 active:bg-cyan-400"
+                }`}
             >
               Community
             </Link>
             <Link
               to="/service"
-              className="text-gray-600 hover:text-blue-500 transition-colors"
+              className={`text-gray-700 font-medium px-3 py-2 rounded-md transition-all duration-50 
+                ${
+                  location.pathname === "/service"
+                    ? "bg-cyan-400 text-blue-700"
+                    : "hover:text-blue-600 hover:bg-blue-50 active:bg-bg-cyan-400"
+                }`}
             >
               Service
             </Link>
             <Link
               to="/contact"
-              className="text-gray-600 hover:text-blue-500 transition-colors"
+              className={`text-gray-700 font-medium px-3 py-2 rounded-md transition-all duration-50 
+                ${
+                  location.pathname === "/contact"
+                    ? "bg-cyan-400 text-blue-700"
+                    : "hover:text-blue-600 hover:bg-blue-50 active:bg-bg-cyan-400"
+                }`}
             >
               Contact
             </Link>
@@ -123,30 +153,60 @@ const Navigation = () => {
               </>
             ) : (
               <div className="flex items-center space-x-3">
-                <span className="text-gray-700">
-                  {userData?.username || userData?.email || "Loading..."}
-                </span>
-                {userData?.profilePhoto ? (
-                  <img
-                    src={userData.profilePhoto}
-                    alt="Profile"
-                    className="w-8 h-8 rounded-full object-cover"
-                  />
-                ) : (
-                  <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white">
-                    {(
-                      userData?.username?.[0] ||
-                      userData?.email?.[0] ||
-                      "?"
-                    ).toUpperCase()}
+                <div className="relative">
+                  <div
+                    className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  >
+                    <span className="text-gray-700 font-medium hover:text-blue-500 transition-colors">
+                      {userData?.username || userData?.email || "Loading..."}
+                    </span>
+                    {userData?.profilePhoto ? (
+                      <img
+                        src={userData.profilePhoto}
+                        alt="Profile"
+                        className="w-8 h-8 rounded-full object-cover border-2 border-blue-500"
+                      />
+                    ) : (
+                      <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white shadow-md">
+                        {(
+                          userData?.username?.[0] ||
+                          userData?.email?.[0] ||
+                          "?"
+                        ).toUpperCase()}
+                      </div>
+                    )}
                   </div>
-                )}
-                <Button
-                  onClick={handleLogout}
-                  className="bg-red-500 hover:bg-red-600 text-white"
-                >
-                  Logout
-                </Button>
+                  {/* Dropdown Menu */}
+                  <div
+                    className={`absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 ${
+                      isDropdownOpen ? "block" : "hidden"
+                    }`}
+                  >
+                    {userData?.role?.toLowerCase().includes("service") ||
+                    userData?.role === "service_provider" ? (
+                      <Link
+                        to="/accountsettings"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        Account Settings
+                      </Link>
+                    ) : userData?.role === "consumer" ? (
+                      <Link
+                        to="/accountsettings1"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        Account Settings
+                      </Link>
+                    ) : null}
+                    <button
+                      onClick={handleLogout}
+                      className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                </div>
               </div>
             )}
           </div>

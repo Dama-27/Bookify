@@ -15,7 +15,7 @@ import com.example.Book.model.Services;
 @Repository
 public interface ServiceDateTimeRepository extends JpaRepository<ServiceDateTime, Long> {
 
-    @Query("SELECT new com.example.Book.dto.ServiceDateTimeDTO(sdt.serviceDateTimeId, sdt.workHoursStart, sdt.workHoursEnd, sdt.timePackages) " +
+    @Query("SELECT new com.example.Book.dto.ServiceDateTimeDTO(sdt.serviceDateTimeId, sdt.workHoursStart, sdt.workHoursEnd, sdt.timePackages, sdt.workingDays) " +
             "FROM ServiceDateTime sdt " +
             "JOIN sdt.services srv " +
             "JOIN srv.provider sp " +

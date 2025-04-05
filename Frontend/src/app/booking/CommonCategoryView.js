@@ -11,20 +11,20 @@ const CommonCategoryView = () => {
       .then((response) => response.json())
       .then((data) => {
         const formattedProviders = data.map((provider) => ({
-          id: provider.provider_id,
+          id: provider.provider_id || provider.providerId, // use either field if available
           name: provider.username,
           firstName: provider.firstName,
           lastName: provider.lastName,
-          service:
+          specialization:
             provider.services?.length > 0
-              ? provider.services[0].name
+              ? provider.services[0].specialization
               : "No Service",
           category:
             provider.services?.length > 0
               ? provider.services[0].category
               : "No Category",
           profileImage: provider.profileImage
-            ? `http://localhost:8081${provider.profileImage}`
+            ? provider.profileImage // full URL already provided
             : "/images/default-avatar.png",
         }));
         setProviders(formattedProviders);
@@ -39,7 +39,7 @@ const CommonCategoryView = () => {
   );
 
   const handleImageError = (e) => {
-    e.target.onerror = null; // Prevent infinite loop
+    e.target.onerror = null;
     e.target.src = "/images/default-avatar.png";
   };
 
@@ -66,13 +66,12 @@ const CommonCategoryView = () => {
               {/* Provider Info */}
               <div className="text-center mb-4">
                 <h4 className="text-xl font-semibold text-gray-800">
-                  {provider.name}
-                </h4>
-                <p className="text-gray-600">
                   {provider.firstName} {provider.lastName}
+                </h4>
+                <p className="text-cyan-500 font-medium">{provider.category}</p>
+                <p className="text-sm text-gray-500">
+                  {provider.specialization}
                 </p>
-                <p className="text-cyan-500 font-medium">{provider.service}</p>
-                <p className="text-sm text-gray-500">{provider.category}</p>
               </div>
 
               {/* Book Now Button */}

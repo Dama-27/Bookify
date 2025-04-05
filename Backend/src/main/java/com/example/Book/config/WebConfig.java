@@ -10,17 +10,25 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        // Handle profile images in uploads directory
         registry.addResourceHandler("/uploads/**")
                 .addResourceLocations("file:uploads/")
+                .setCachePeriod(3600)
+                .resourceChain(true);
+
+        // Handle default avatar in static resources
+        registry.addResourceHandler("/images/**")
+                .addResourceLocations("classpath:/static/images/")
                 .setCachePeriod(3600)
                 .resourceChain(true);
     }
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/uploads/**")
+        registry.addMapping("/**")
                 .allowedOrigins("http://localhost:3000")
-                .allowedMethods("GET")
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                .allowedHeaders("*")
                 .allowCredentials(true);
     }
 } 

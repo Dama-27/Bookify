@@ -1,84 +1,167 @@
-import React, { useEffect, useState } from 'react';
-import image1 from '../../images/Ellipse 1.png';
-import image2 from '../../images/Ellipse 137.png';
-import image3 from '../../images/Ellipse 138.png';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
-const CommonCategoryView = () => {
+const DoctorCategoryView = () => {
   const [providers, setProviders] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
 
   useEffect(() => {
-    fetch('http://localhost:8081/api/booking/providers')
-      .then(response => response.json())
-      .then(data => {
+    fetch("http://localhost:8081/api/booking/providers")
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Received providers data:", data);
         const filteredProviders = data
-          .filter(provider => 
-            provider.services.some(service => service.category === "Doctor") // Filtering providers with "Doctor" service
+          .filter((provider) =>
+            provider.services?.some((service) => service.category === "Doctor")
           )
-          .map(provider => ({
-            id: provider.providerId,
-            name: provider.username,
-            service: provider.services.length > 0 ? provider.services[0].name : 'No Service',
-            image: `https://via.placeholder.com/48?text=${provider.username.charAt(0)}` // Placeholder image
-          }));
-
+          .map((provider) => {
+            console.log("Processing provider:", provider);
+            return {
+              id: provider.provider_id,
+              name: provider.username,
+              firstName: provider.firstName,
+              lastName: provider.lastName,
+              service:
+                provider.services?.length > 0
+                  ? provider.services[0].name
+                  : "No Service",
+              category: "Doctor",
+              profileImage: provider.profileImage
+                ? provider.profileImage.startsWith("http")
+                  ? provider.profileImage
+                  : provider.profileImage.startsWith("data:image")
+                  ? provider.profileImage
+                  : `http://localhost:8081/uploads/${provider.profileImage.replace(
+                      /^\/+/,
+                      ""
+                    )}`
+                : "http://localhost:8081/images/default-avatar.png",
+            };
+          });
+        console.log("Filtered providers:", filteredProviders);
         setProviders(filteredProviders);
       })
-      .catch(error => console.error('Error fetching providers:', error));
+      .catch((error) => console.error("Error fetching providers:", error));
   }, []);
 
   const totalPages = Math.ceil(providers.length / itemsPerPage);
-  const currentProviders = providers.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  const currentProviders = providers.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const handleImageError = (e) => {
+    const originalSrc = e.target.src;
+    console.log("Image failed to load:", originalSrc);
+    e.target.onerror = null; // Prevent infinite loop
+
+    // If the original source was already the default avatar, don't try to load it again
+    if (originalSrc.includes("default-avatar.png")) {
+      console.log("Default avatar also failed to load");
+      return;
+    }
+
+    // Try loading the default avatar
+    const defaultAvatar = "http://localhost:8081/images/default-avatar.png";
+    console.log("Attempting to load default avatar:", defaultAvatar);
+    e.target.src = defaultAvatar;
+  };
 
   return (
     <div className="bg-blue-50 rounded-3xl p-8">
-      <h3 className="text-lg font-medium mb-6">Common Services</h3>
-      <div className="grid grid-cols-3 gap-4 items-center">
-        {currentProviders.map(provider => (
-          <div key={provider.id} className="bg-white rounded-lg p-4 border border-gray-100 items-center">
-            <div className="place-items-center mb-4">
-              <div className="w-12 h-12 rounded-full overflow-hidden mr-3 items-center">
-                <img 
-                  src={provider.image}
-                  alt={`Provider ${provider.name}`} 
-                  className="w-full h-full object-cover"
+      <h3 className="text-2xl font-semibold mb-6">Doctor Services</h3>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {currentProviders.map((provider) => (
+          <div
+            key={provider.id}
+            className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow"
+          >
+            <div className="flex flex-col items-center">
+              {/* Profile Image Container */}
+              <div className="w-24 h-24 mb-4">
+                <img
+                  src={provider.profileImage}
+                  alt={`${provider.name}'s profile`}
+                  onError={handleImageError}
+                  className="w-full h-full rounded-full object-cover border-4 border-cyan-100"
                 />
               </div>
-              <div>
-                <h4 className="font-medium">{provider.name}</h4>
-                <p className="text-gray-600">{provider.service}</p>
+
+              {/* Provider Info */}
+              <div className="text-center mb-4">
+                <h4 className="text-xl font-semibold text-gray-800">
+                  {provider.name}
+                </h4>
+                <p className="text-gray-600">
+                  {provider.firstName} {provider.lastName}
+                </p>
+                <p className="text-cyan-500 font-medium">{provider.service}</p>
+                <p className="text-sm text-gray-500">{provider.category}</p>
               </div>
+
+              {/* Book Now Button */}
+              <Link
+                to={`/clientbookingpage?provider=${provider.id}`}
+                className="inline-flex items-center px-6 py-2 bg-cyan-400 text-white rounded-full hover:bg-cyan-500 transition-colors"
+              >
+                Book Now
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-4 w-4 ml-2"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M14 5l7 7m0 0l-7 7m7-7H3"
+                  />
+                </svg>
+              </Link>
             </div>
-            <Link to="/clientbookingpage" className="bg-cyan-400 text-white px-4 py-1 rounded-full text-sm hover:bg-cyan-500 transition">
-              Book Now
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 inline-block ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-              </svg>
-            </Link>
           </div>
         ))}
       </div>
-      <div className="flex justify-center mt-6 gap-2">
-        {currentPage > 1 && (
-          <button onClick={() => setCurrentPage(currentPage - 1)} className="bg-gray-300 px-4 py-2 rounded-l-lg">Previous</button>
-        )}
-        {Array.from({ length: totalPages }, (_, index) => (
-          <button 
-            key={index + 1} 
-            onClick={() => setCurrentPage(index + 1)} 
-            className={`px-4 py-2 ${currentPage === index + 1 ? 'bg-cyan-500 text-white' : 'bg-gray-300'} rounded-md`}
-          >
-            {index + 1}
-          </button>
-        ))}
-        {currentPage < totalPages && (
-          <button onClick={() => setCurrentPage(currentPage + 1)} className="bg-gray-300 px-4 py-2 rounded-r-lg">Next</button>
-        )}
-      </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex justify-center mt-8 gap-2">
+          {currentPage > 1 && (
+            <button
+              onClick={() => setCurrentPage(currentPage - 1)}
+              className="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              Previous
+            </button>
+          )}
+          {Array.from({ length: totalPages }, (_, index) => (
+            <button
+              key={index + 1}
+              onClick={() => setCurrentPage(index + 1)}
+              className={`px-4 py-2 rounded-lg transition-colors ${
+                currentPage === index + 1
+                  ? "bg-cyan-500 text-white"
+                  : "bg-white border border-gray-300 hover:bg-gray-50"
+              }`}
+            >
+              {index + 1}
+            </button>
+          ))}
+          {currentPage < totalPages && (
+            <button
+              onClick={() => setCurrentPage(currentPage + 1)}
+              className="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              Next
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 };
 
-export default CommonCategoryView;
+export default DoctorCategoryView;

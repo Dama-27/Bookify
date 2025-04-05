@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import com.example.Book.dto.BookingDTO;
 import com.example.Book.dto.ScheduleDTO;
 import com.example.Book.dto.ServiceDTO;
-import com.example.Book.dto.ServiceDateTimeDTO;
 import com.example.Book.dto.ServiceProviderDTO;
 import com.example.Book.model.Booking;
 import com.example.Book.model.Consumer;
@@ -19,12 +18,14 @@ import com.example.Book.model.Services;
 import com.example.Book.repo.BookingRepository;
 import com.example.Book.repo.ConsumerRepository;
 import com.example.Book.repo.ScheduleRepository;
-import com.example.Book.repo.ServiceDateTimeRepository;
 import com.example.Book.repo.ServiceProviderRepository;
 import com.example.Book.repo.ServiceRepository;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+
+import com.example.Book.dto.*;
+import com.example.Book.repo.*;
 
 @Service
 public class BookingService {
@@ -85,7 +86,7 @@ public class BookingService {
 
     private ServiceDTO convertToServiceDTO(Services service) {
         return new ServiceDTO(
-                service.getServiceId(),
+                service.getService_id(),
                 service.getName(),
                 service.getSpecialization(),
                 service.getPrice(),

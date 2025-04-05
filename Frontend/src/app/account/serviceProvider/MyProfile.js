@@ -100,50 +100,10 @@ const Email = styled.a`
   text-decoration: none;
 `;
 
-const ProfileImageContainer = styled.div`
-  position: relative;
-  display: inline-block;
-  margin-bottom: 20px;
-`;
-
-const ProfileImage = styled.img`
-  width: 150px;
-  height: 150px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 4px solid white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-`;
-
-const ImageUploadButton = styled.label`
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  background: #0056b3;
-  color: white;
-  padding: 8px;
-  border-radius: 50%;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  transition: background-color 0.2s;
-
-  &:hover {
-    background: #003d82;
-  }
-
-  input[type="file"] {
-    display: none;
-  }
-`;
-
 const MyProfile = ({ userData, setUserData }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedData, setEditedData] = useState({ ...userData });
   const [loading, setLoading] = useState(false);
-  const [imageUploadLoading, setImageUploadLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -200,13 +160,10 @@ const MyProfile = ({ userData, setUserData }) => {
         throw new Error("No response received from server");
       }
 
-      // Update both local state and localStorage
-      const updatedUserData = {
-        ...userData,
+      setUserData((prev) => ({
+        ...prev,
         ...response,
-      };
-      setUserData(updatedUserData);
-      localStorage.setItem("userInfo", JSON.stringify(updatedUserData));
+      }));
 
       setIsEditing(false);
       toast.success("Profile updated successfully!");
@@ -239,118 +196,23 @@ const MyProfile = ({ userData, setUserData }) => {
     }
   };
 
-  const handleImageUpload = async (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    // Validate file type
-    if (!file.type.startsWith("image/")) {
-      toast.error("Please upload an image file");
-      return;
-    }
-
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("Image size should be less than 5MB");
-      return;
-    }
-
-    setImageUploadLoading(true);
-    const formData = new FormData();
-    formData.append("file", file);
-
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        toast.error("Authentication required. Please login again.");
-        window.location.href = "/service-provider/login";
-        return;
-      }
-
-      // Ensure token has the correct format
-      const formattedToken = token.startsWith("Bearer ")
-        ? token
-        : `Bearer ${token}`;
-
-      const response = await fetch(
-        "http://localhost:8081/api/upload/profile-image",
-        {
-          method: "POST",
-          headers: {
-            Authorization: formattedToken,
-            // Don't set Content-Type header - let browser set it for FormData
-          },
-          credentials: "include",
-          body: formData,
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to upload image");
-      }
-
-      const data = await response.json();
-
-      // Construct the complete URL for the image
-      const imageUrl = `http://localhost:8081${data.imageUrl}`;
-
-      // Update the profile image URL in the edited data
-      setEditedData((prev) => ({
-        ...prev,
-        profileImage: imageUrl,
-      }));
-
-      // Update the user data
-      setUserData((prev) => ({
-        ...prev,
-        profileImage: imageUrl,
-      }));
-
-      toast.success("Profile image updated successfully!");
-    } catch (error) {
-      console.error("Image upload error:", error);
-      toast.error("Failed to upload image. Please try again.");
-    } finally {
-      setImageUploadLoading(false);
-    }
-  };
-
-  // Add a function to handle image loading errors
-  const handleImageError = (e) => {
-    e.target.onerror = null; // Prevent infinite loop
-    e.target.src = "/images/default-avatar.png"; // Use a local default avatar
-  };
-
   return (
     <ProfileContainer>
       {/* Profile Card */}
       <ProfileCard>
         <div className="flex items-center w-full">
-          <ProfileImageContainer>
-            <ProfileImage
-              src={userData.profileImage || "/images/default-avatar.png"}
-              alt="Profile"
-              onError={handleImageError}
-            />
-            <ImageUploadButton>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageUpload}
-                disabled={imageUploadLoading}
-              />
-              <Pencil size={16} />
-            </ImageUploadButton>
-          </ProfileImageContainer>
+          <img
+            src={userData.profileImage || "/default-avatar.png"}
+            alt="Profile"
+            className="w-20 h-20 rounded-full object-cover border-4 border-white"
+          />
           <ProfileDetails>
             <p>
               <Bold>
                 Name: {userData.firstName} {userData.lastName}
               </Bold>
             </p>
-            <p>
-              <Bold>Bio: {userData.bio || "Not specified"}</Bold>
-            </p>
+            <p>Bio: {userData.bio || "Not specified"}</p>
           </ProfileDetails>
           {!isEditing && (
             <EditIcon onClick={() => setIsEditing(true)}>
@@ -470,9 +332,7 @@ const MyProfile = ({ userData, setUserData }) => {
                 rows="3"
               />
             ) : (
-              <p>
-                <Bold>{userData.bio || "Not specified"}</Bold>
-              </p>
+              <p>{userData.bio || "Not specified"}</p>
             )}
           </div>
         </Info>
@@ -501,9 +361,7 @@ const MyProfile = ({ userData, setUserData }) => {
                 rows="2"
               />
             ) : (
-              <p>
-                <Bold>{userData.address || "Not specified"}</Bold>
-              </p>
+              <p>{userData.address || "Not specified"}</p>
             )}
           </div>
         </Info>

@@ -1,5 +1,7 @@
 package com.example.Book.model;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -13,33 +15,30 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+
 @Entity
+@Table(name = "service")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "services")
 public class Services {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer serviceId;
+    private Integer service_id;
 
-    @Column(nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "provider_id", nullable = false)
+    private ServiceProvider provider;
+
     private String name;
-
-    @Column(nullable = false)
     private String specialization;
-
-    @Column(nullable = false)
     private Double price;
 
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(nullable = false)
+    
     private String category;
-
-    @ManyToOne
-    @JoinColumn(name = "provider_id")
-    private ServiceProvider provider;
 }

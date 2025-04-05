@@ -1,26 +1,19 @@
 package com.example.Book.repo;
 
-import java.util.List;
-import java.util.Optional;
-
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
-
 import com.example.Book.dto.ServiceDateTimeDTO;
 import com.example.Book.model.ServiceDateTime;
-import com.example.Book.model.Services;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-@Repository
+import java.util.List;
+
 public interface ServiceDateTimeRepository extends JpaRepository<ServiceDateTime, Long> {
 
-    @Query("SELECT new com.example.Book.dto.ServiceDateTimeDTO(sdt.serviceDateTimeId, sdt.workHoursStart, sdt.workHoursEnd, sdt.timePackages) " +
+    @Query("SELECT new com.example.Book.dto.ServiceDateTimeDTO(sdt.serviceDateTimeId, sdt.startTime, sdt.EndTime, sdt.duration, sdt.date) " +
             "FROM ServiceDateTime sdt " +
             "JOIN sdt.services srv " +
             "JOIN srv.provider sp " +
             "WHERE sp.provider_id = :providerId")
     List<ServiceDateTimeDTO> findByProviderId(@Param("providerId") Long providerId);
-
-    Optional<ServiceDateTime> findByServices(Services services);
 }

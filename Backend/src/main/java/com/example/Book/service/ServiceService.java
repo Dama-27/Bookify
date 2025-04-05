@@ -30,8 +30,8 @@ public class ServiceService {
                 .orElseThrow(() -> new RuntimeException("Service Provider not found with email: " + email));
         
         // If service has an ID, update existing service
-        if (service.getServiceId() != null) {
-            Services existingService = serviceRepository.findById(service.getServiceId())
+        if (service.getService_id() != null) {
+            Services existingService = serviceRepository.findById(service.getService_id())
                     .orElseThrow(() -> new RuntimeException("Service not found"));
             
             // Verify the service belongs to the provider

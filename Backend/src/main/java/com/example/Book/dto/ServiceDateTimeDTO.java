@@ -1,17 +1,20 @@
 package com.example.Book.dto;
 
+import com.example.Book.model.Services;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-@Getter
-@Setter
+import java.time.LocalDateTime;
+
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class ServiceDateTimeDTO {
+
     private Long serviceDateTimeId;
-    private String workHoursStart;
-    private String workHoursEnd;
-    private Integer timePackages;
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
+    private Integer duration;
+    private String date;
 }

@@ -1,58 +1,54 @@
 import React, { useState, useEffect } from 'react';
 import Navigation from '../../components/ui/navigation';
-import { fetchReviews, submitReview } from '../../services/reviewApi';
+import { fetchFeedback, submitFeedback } from '../../services/reviewApi';
 
 const Review = () => {
-  const [reviews, setReviews] = useState([]);
-  const [newReview, setNewReview] = useState({
-    consumerId: "",
-    consumerName: "",
+  const [feedbacks, setFeedbacks] = useState([]);
+  const [newFeedback, setNewFeedback] = useState({
+    name: "",
     rating: 5,
-    comment: "",
-    bookingId: ""
+    comments: "",
   });
 
-  // Fetch reviews when component loads
+  // Fetch feedbacks when component loads
   useEffect(() => {
-    const getReviews = async () => {
-      const data = await fetchReviews();
-      console.log("Fetched Reviews:", data); // Debugging
-      setReviews(data);
+    const getFeedback = async () => {
+      const data = await fetchFeedback();
+      setFeedbacks(data);
     };
-    getReviews();
+    getFeedback();
   }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setNewReview({
-      ...newReview,
+    setNewFeedback({
+      ...newFeedback,
       [name]: name === "rating" ? parseInt(value) : value
     });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!newReview.consumerId || !newReview.bookingId) {
-      alert("Consumer ID and Booking ID are required!");
+
+    if (!newFeedback.name) {
+      alert("Your name is required!");
       return;
     }
 
     try {
-      const reviewToAdd = await submitReview({
-        consumerId: newReview.consumerId,
-        bookingId: newReview.bookingId,
-        comments: newReview.comment,  // Ensure correct field name
-        rating: newReview.rating
+      const feedbackToAdd = await submitFeedback({
+        name: newFeedback.name,
+        comments: newFeedback.comments,
+        rating: newFeedback.rating
       });
 
-      // Append the new review to the existing list
-      setReviews((prevReviews) => [...prevReviews, reviewToAdd]);
+      // Append the new feedback to the existing list
+      setFeedbacks((prevFeedbacks) => [...prevFeedbacks, feedbackToAdd]);
 
-      // Reset newReview form after submission
-      setNewReview({ consumerId: "", consumerName: "", rating: 5, comment: "", bookingId: "" });
+      // Reset newFeedback form after submission
+      setNewFeedback({ name: "", rating: 5, comments: "" });
     } catch (error) {
-      alert("Failed to submit review. Please try again.");
+      alert("Failed to submit feedback. Please try again.");
     }
   };
 
@@ -60,25 +56,25 @@ const Review = () => {
     <div className="max-w-4xl mx-auto p-6">
       <Navigation /> 
       
-      {/* Review List */}
+      {/* Feedback List */}
       <section className='p-10'>
         <div className="p-6 rounded-lg shadow-md bg-cyan-50">
-          <h1 className="text-3xl font-bold text-gray-800 mb-6">Customer Reviews</h1>
+          <h1 className="text-3xl font-bold text-gray-800 mb-6">Customer Feedback</h1>
           <div className="mb-10">
             <h2 className="text-xl font-semibold mb-4">What Our Customers Say</h2>
             <div className="space-y-4">
-              {reviews.length > 0 ? (
-                reviews.map((review) => (
-                  <div key={review.responseDate} className="bg-white p-4 rounded-lg shadow-md">
+              {feedbacks.length > 0 ? (
+                feedbacks.map((feedback) => (
+                  <div key={feedback.responseDate} className="bg-white p-4 rounded-lg shadow-md">
                     <div className="flex items-center justify-between mb-2">
                       <span className="font-medium text-gray-800">
-                        {review.consumerName || "Anonymous"}
+                        {feedback.name || "Anonymous"}
                       </span>
                       <div className="flex">
                         {[...Array(5)].map((_, i) => (
                           <svg 
                             key={i} 
-                            className={`w-5 h-5 ${i < review.rating ? "text-yellow-400" : "text-gray-300"}`} 
+                            className={`w-5 h-5 ${i < feedback.rating ? "text-yellow-400" : "text-gray-300"}`} 
                             fill="currentColor" 
                             viewBox="0 0 20 20"
                           >
@@ -87,21 +83,21 @@ const Review = () => {
                         ))}
                       </div>
                     </div>
-                    <p className="text-gray-600 italic">"{review.comments}"</p> {/* Use comments */}
+                    <p className="text-gray-600 italic">"{feedback.comments}"</p>
                   </div>
                 ))
               ) : (
-                <p className="text-gray-600">No reviews yet.</p>
+                <p className="text-gray-600">No feedback yet.</p>
               )}
             </div>
           </div>
         </div>
       </section>
 
-      {/* Leave a Review */}
+      {/* Leave a Feedback */}
       <section className='p-10'>
         <div className="bg-cyan-50 p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-semibold mb-4">Leave a Review</h2>
+          <h2 className="text-xl font-semibold mb-4">Leave Feedback</h2>
           <form onSubmit={handleSubmit}>
             <div className="mb-4">
               <label htmlFor="name" className="block text-gray-700 mb-2">Your Name</label>
@@ -109,7 +105,7 @@ const Review = () => {
                 type="text"
                 id="name"
                 name="name"
-                value={newReview.name}
+                value={newFeedback.name}
                 onChange={handleInputChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
@@ -125,12 +121,12 @@ const Review = () => {
                       type="radio"
                       name="rating"
                       value={star}
-                      checked={newReview.rating === star}
+                      checked={newFeedback.rating === star}
                       onChange={handleInputChange}
                       className="sr-only"
                     />
                     <svg 
-                      className={`w-8 h-8 cursor-pointer ${newReview.rating >= star ? "text-yellow-400" : "text-gray-300"}`} 
+                      className={`w-8 h-8 cursor-pointer ${newFeedback.rating >= star ? "text-yellow-400" : "text-gray-300"}`} 
                       fill="currentColor" 
                       viewBox="0 0 20 20"
                     >
@@ -142,11 +138,11 @@ const Review = () => {
             </div>
 
             <div className="mb-4">
-              <label htmlFor="comment" className="block text-gray-700 mb-2">Your Review</label>
+              <label htmlFor="comment" className="block text-gray-700 mb-2">Your Feedback</label>
               <textarea
                 id="comment"
-                name="comment"
-                value={newReview.comment}
+                name="comments"
+                value={newFeedback.comments}
                 onChange={handleInputChange}
                 rows="4"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -155,7 +151,7 @@ const Review = () => {
             </div>
 
             <button type="submit" className="bg-blue-500 text-white py-2 px-6 rounded-md hover:bg-blue-600 transition duration-300 font-medium">
-              Submit Review
+              Submit Feedback
             </button>
           </form>
         </div>

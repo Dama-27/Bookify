@@ -54,7 +54,7 @@ public class ServiceController {
         // Convert services to include ServiceDateTime information
         List<Map<String, Object>> servicesWithDateTime = services.stream().map(service -> {
             Map<String, Object> serviceMap = new HashMap<>();
-            serviceMap.put("serviceId", service.getServiceId());
+            serviceMap.put("serviceId", service.getService_id());
             serviceMap.put("name", service.getName());
             serviceMap.put("specialization", service.getSpecialization());
             serviceMap.put("price", service.getPrice());

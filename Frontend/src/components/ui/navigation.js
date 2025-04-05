@@ -85,9 +85,10 @@ const Navigation = () => {
             <Link
               to="/"
               className={`text-gray-700 font-medium px-3 py-2 rounded-md transition-all duration-200 
-                ${location.pathname === '/' 
-                  ? 'bg-cyan-400 text-blue-700' 
-                  : 'hover:text-blue-600 hover:bg-blue-50 active:bg-cyan-400'
+                ${
+                  location.pathname === "/"
+                    ? "bg-cyan-400 text-blue-700"
+                    : "hover:text-blue-600 hover:bg-blue-50 active:bg-cyan-400"
                 }`}
             >
               Home
@@ -95,9 +96,10 @@ const Navigation = () => {
             <Link
               to="/review"
               className={`text-gray-700 font-medium px-3 py-2 rounded-md transition-all duration-50 
-                ${location.pathname === '/review' 
-                  ? 'bg-cyan-400 text-blue-700' 
-                  : 'hover:text-blue-600 hover:bg-blue-50 active:bg-cyan-400'
+                ${
+                  location.pathname === "/review"
+                    ? "bg-cyan-400 text-blue-700"
+                    : "hover:text-blue-600 hover:bg-blue-50 active:bg-cyan-400"
                 }`}
             >
               Review
@@ -105,9 +107,10 @@ const Navigation = () => {
             <Link
               to="/community"
               className={`text-gray-700 font-medium px-3 py-2 rounded-md transition-all duration-50 
-                ${location.pathname === '/community' 
-                  ? 'bg-cyan-400 text-blue-700' 
-                  : 'hover:text-blue-600 hover:bg-blue-50 active:bg-cyan-400'
+                ${
+                  location.pathname === "/community"
+                    ? "bg-cyan-400 text-blue-700"
+                    : "hover:text-blue-600 hover:bg-blue-50 active:bg-cyan-400"
                 }`}
             >
               Community
@@ -115,9 +118,10 @@ const Navigation = () => {
             <Link
               to="/service"
               className={`text-gray-700 font-medium px-3 py-2 rounded-md transition-all duration-50 
-                ${location.pathname === '/service' 
-                  ? 'bg-cyan-400 text-blue-700' 
-                  : 'hover:text-blue-600 hover:bg-blue-50 active:bg-bg-cyan-400'
+                ${
+                  location.pathname === "/service"
+                    ? "bg-cyan-400 text-blue-700"
+                    : "hover:text-blue-600 hover:bg-blue-50 active:bg-bg-cyan-400"
                 }`}
             >
               Service
@@ -125,9 +129,10 @@ const Navigation = () => {
             <Link
               to="/contact"
               className={`text-gray-700 font-medium px-3 py-2 rounded-md transition-all duration-50 
-                ${location.pathname === '/contact' 
-                  ? 'bg-cyan-400 text-blue-700' 
-                  : 'hover:text-blue-600 hover:bg-blue-50 active:bg-bg-cyan-400'
+                ${
+                  location.pathname === "/contact"
+                    ? "bg-cyan-400 text-blue-700"
+                    : "hover:text-blue-600 hover:bg-blue-50 active:bg-bg-cyan-400"
                 }`}
             >
               Contact
@@ -150,7 +155,7 @@ const Navigation = () => {
             ) : (
               <div className="flex items-center space-x-3">
                 <div className="relative">
-                  <div 
+                  <div
                     className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                   >
@@ -174,15 +179,20 @@ const Navigation = () => {
                     )}
                   </div>
                   {/* Dropdown Menu */}
-                  <div className={`absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 ${isDropdownOpen ? 'block' : 'hidden'}`}>
-                    {userData?.role?.toLowerCase().includes('service') || userData?.role === 'service_provider' ? (
+                  <div
+                    className={`absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 ${
+                      isDropdownOpen ? "block" : "hidden"
+                    }`}
+                  >
+                    {userData?.role?.toLowerCase().includes("service") ||
+                    userData?.role === "service_provider" ? (
                       <Link
                         to="/accountsettings"
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                       >
                         Account Settings
                       </Link>
-                    ) : userData?.role === 'consumer' ? (
+                    ) : userData?.role === "consumer" ? (
                       <Link
                         to="/accountsettings1"
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"

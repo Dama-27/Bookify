@@ -1,11 +1,8 @@
 package com.example.Book.dto;
 
-import com.example.Book.model.Services;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
@@ -13,8 +10,8 @@ import java.time.LocalDateTime;
 public class ServiceDateTimeDTO {
 
     private Long serviceDateTimeId;
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
+    private String startTime;
+    private String endTime;
     private Integer duration;
     private String date;
 }

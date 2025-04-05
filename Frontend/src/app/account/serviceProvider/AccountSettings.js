@@ -20,10 +20,6 @@ const AccountSettings = () => {
     contact: "",
     experience: 0,
     isActive: false,
-    firstName: "",
-    lastName: "",
-    bio: "",
-    profileImage: "",
     personalInfo: {
       firstName: "",
       lastName: "",
@@ -41,38 +37,34 @@ const AccountSettings = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const loadUserData = async () => {
+    // Check authentication
+    const token = localStorage.getItem("token");
+    const userRole = localStorage.getItem("userRole");
+
+    console.log("Checking authentication:", { token, userRole });
+
+    if (!token) {
+      console.error("No token found, redirecting to login");
+      navigate("/service-provider/login");
+      return;
+    }
+
+    if (userRole !== "service_providers") {
+      console.error("User is not a service provider, redirecting to login");
+      navigate("/service-provider/login");
+      return;
+    }
+
+    const loadProfileData = async () => {
       try {
-        // First try to get data from localStorage
-        const storedUserInfo = localStorage.getItem("userInfo");
-        if (storedUserInfo) {
-          const parsedUserInfo = JSON.parse(storedUserInfo);
-          setUserData((prevData) => ({
-            ...prevData,
-            ...parsedUserInfo,
-          }));
-        }
-
-        // Then fetch fresh data from the server
-        const token = localStorage.getItem("token");
-        const userRole = localStorage.getItem("userRole");
-
-        if (!token) {
-          throw new Error("No token found");
-        }
-
-        if (userRole !== "service_providers") {
-          throw new Error("Invalid user role");
-        }
-
-        console.log("Fetching profile data from server...");
+        console.log("Loading profile data...");
         const profileData = await fetchServiceProviderProfile();
+        console.log("Received profile data:", profileData);
 
         if (!profileData) {
           throw new Error("No profile data received");
         }
 
-        // Update state with fresh data
         setUserData((prevData) => ({
           ...prevData,
           username: profileData.username || "",
@@ -81,28 +73,18 @@ const AccountSettings = () => {
           contact: profileData.contact || "",
           experience: profileData.experience || 0,
           isActive: profileData.isActive || false,
-          firstName: profileData.firstName || "",
-          lastName: profileData.lastName || "",
-          bio: profileData.bio || "",
-          profileImage: profileData.profileImage || "",
           personalInfo: {
             ...prevData.personalInfo,
-            firstName: profileData.firstName || "",
-            lastName: profileData.lastName || "",
             phone: profileData.contact || "",
           },
         }));
-
-        // Update localStorage with fresh data
-        localStorage.setItem("userInfo", JSON.stringify(profileData));
       } catch (err) {
         console.error("Error loading profile:", err);
         if (
-          err.message.includes("No token found") ||
-          err.message.includes("Invalid user role") ||
           err.message.includes("Authentication required") ||
           err.message.includes("Session expired")
         ) {
+          // Clear localStorage and redirect to login
           localStorage.removeItem("token");
           localStorage.removeItem("userInfo");
           localStorage.removeItem("userRole");
@@ -115,7 +97,7 @@ const AccountSettings = () => {
       }
     };
 
-    loadUserData();
+    loadProfileData();
   }, [navigate]);
 
   const renderSidebar = () => {
@@ -181,19 +163,12 @@ const AccountSettings = () => {
 
   const renderContent = () => {
     if (loading) {
-      return (
-        <div className="flex items-center justify-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-          <span className="ml-2">Loading profile data...</span>
-        </div>
-      );
+      return <div className="text-center py-4">Loading profile data...</div>;
     }
 
     if (error) {
       return (
-        <div className="bg-red-50 text-red-500 p-4 rounded-lg text-center">
-          Error: {error}
-        </div>
+        <div className="text-red-500 text-center py-4">Error: {error}</div>
       );
     }
 
@@ -221,12 +196,13 @@ const AccountSettings = () => {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-6xl mx-auto">
         <Navigation />
+
         <h1 className="text-2xl font-bold mb-6">Account Settings</h1>
+
         <div className="flex flex-col md:flex-row gap-6">
           {renderSidebar()}
-          <div className="flex-1 bg-white rounded-lg shadow-sm">
-            {renderContent()}
-          </div>
+
+          <div className="flex-1">{renderContent()}</div>
         </div>
       </div>
     </div>

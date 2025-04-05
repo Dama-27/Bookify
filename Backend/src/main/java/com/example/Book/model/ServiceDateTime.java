@@ -40,7 +40,7 @@ public class ServiceDateTime {
 
     // Time slots
     @Column(name = "time_packages", nullable = false)
-    private Integer timePackages = 4;
+    private Integer timePackages;
 
     @ManyToOne
     @JoinColumn(name = "service_id", nullable = false)

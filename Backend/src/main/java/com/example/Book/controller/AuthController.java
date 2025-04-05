@@ -1,6 +1,5 @@
 package com.example.Book.controller;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,11 +10,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.Book.dto.MessageResponse;
-import com.example.Book.dto.PasswordResetRequest;
 import com.example.Book.model.Consumer;
 import com.example.Book.model.ServiceProvider;
 import com.example.Book.service.UserService;
+
 
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
@@ -27,12 +25,12 @@ public class AuthController {
 
     // Register Service Provider
     @PostMapping("/service-provider/register")
-    public ResponseEntity<String> registerProvider(@RequestBody ServiceProvider provider) {
+    public void registerProvider(@RequestBody ServiceProvider provider) {
         try {
             String result = userService.registerServiceProvider(provider);
-            return ResponseEntity.ok(result);
+            ResponseEntity.ok(result);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Registration failed: " + e.getMessage());
+            ResponseEntity.badRequest().body("Registration failed: " + e.getMessage());
         }
     }
 
@@ -49,34 +47,16 @@ public class AuthController {
 
     // Login for both Service Provider and Consumer
     @PostMapping("/login")
-    public ResponseEntity<Map<String, Object>> login(@RequestBody Map<String, String> credentials) {
-        try {
-            String email = credentials.get("email");
-            String password = credentials.get("password");
-            Map<String, Object> response = userService.loginUser(email, password);
+    public ResponseEntity<Map<String, String>> login(@RequestBody Map<String, String> credentials) {
+        String email = credentials.get("email");
+        String password = credentials.get("password");
+        String token = userService.loginUser(email, password);
 
-            // Format the response to match frontend expectations
-            Map<String, Object> formattedResponse = new HashMap<>();
-            formattedResponse.put("token", "Bearer " + response.get("token"));
-            formattedResponse.put("user", response.get("userData"));
-            formattedResponse.put("role", response.get("role"));
-
-            return ResponseEntity.ok(formattedResponse);
-        } catch (Exception e) {
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
-            return ResponseEntity.status(401).body(errorResponse);
+        if (token == null) {
+            return ResponseEntity.status(401).body(Map.of("error", "Invalid credentials"));
         }
-    }
 
-    @PostMapping("/reset-password")
-    public ResponseEntity<MessageResponse> resetPassword(@RequestBody PasswordResetRequest request) {
-        try {
-            String result = userService.resetPassword(request.getEmail(), request.getOldPassword(), request.getNewPassword());
-            return ResponseEntity.ok(new MessageResponse(result));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
-        }
+        return ResponseEntity.ok(Map.of("token", "Bearer " + token));
     }
 
 }

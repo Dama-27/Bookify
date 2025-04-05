@@ -87,32 +87,49 @@ public class ConsumerController {
             if (consumerOpt.isPresent()) {
                 Consumer consumer = consumerOpt.get();
                 
-                // Update fields if provided in the request
+                // Update basic information
                 if (consumerDetails.getUsername() != null) {
                     consumer.setUsername(consumerDetails.getUsername());
                 }
-                
                 if (consumerDetails.getEmail() != null) {
                     consumer.setEmail(consumerDetails.getEmail());
                 }
                 
+                // Update contact information
                 if (consumerDetails.getPhone() != null) {
                     consumer.setPhone(consumerDetails.getPhone());
                 }
                 
+                // Update profile information
+                if (consumerDetails.getBio() != null) {
+                    consumer.setBio(consumerDetails.getBio());
+                }
+                if (consumerDetails.getNotes() != null) {
+                    consumer.setNotes(consumerDetails.getNotes());
+                }
+                if (consumerDetails.getProfileImage() != null) {
+                    consumer.setProfileImage(consumerDetails.getProfileImage());
+                }
+                
+                // Update address
                 if (consumerDetails.getAddress() != null) {
                     consumer.setAddress(consumerDetails.getAddress());
                 }
                 
+                // Update status
                 if (consumerDetails.getStatus() != null) {
                     consumer.setStatus(consumerDetails.getStatus());
                 }
                 
-                if (consumerDetails.getNotes() != null) {
-                    consumer.setNotes(consumerDetails.getNotes());
+                // Update notification settings
+                if (consumerDetails.getEmailNotifications() != null) {
+                    consumer.setEmailNotifications(consumerDetails.getEmailNotifications());
+                }
+                if (consumerDetails.getSmsNotifications() != null) {
+                    consumer.setSmsNotifications(consumerDetails.getSmsNotifications());
                 }
                 
-                // Don't update password from this endpoint for security reasons
+                // Don't update password, createdAt, or other sensitive fields from this endpoint
                 
                 Consumer updatedConsumer = consumerRepository.save(consumer);
                 return ResponseEntity.ok(updatedConsumer);

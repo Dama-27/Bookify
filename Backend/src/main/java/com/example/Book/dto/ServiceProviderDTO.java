@@ -18,4 +18,5 @@ public class ServiceProviderDTO {
     private Integer experience;
     private Boolean isActive;
     private List<ServiceDTO> services;
+    private String profileImage;
 }

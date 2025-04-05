@@ -35,25 +35,44 @@ public class JwtFilter extends OncePerRequestFilter {
         String token = null;
         String username = null;
 
+        // Log the request path for debugging
+        System.out.println("Processing request: " + request.getMethod() + " " + request.getRequestURI());
+
         try {
             if (authHeader != null && authHeader.startsWith("Bearer ")) {
                 token = authHeader.substring(7).trim();
                 if (!token.isEmpty()) {
                     try {
+                        // Log the token for debugging (only first few characters)
+                        System.out.println("Received token: " + token.substring(0, Math.min(token.length(), 10)) + "...");
+                        
+                        // Check if token contains whitespace
+                        if (token.contains(" ")) {
+                            System.out.println("Token contains whitespace, removing...");
+                            token = token.replaceAll("\\s+", "");
+                        }
+                        
                         username = jwtService.extractUserName(token);
-                        System.out.println("JWT Token Extracted: " + token.substring(0, Math.min(token.length(), 10)) + "...");
                         System.out.println("Username Extracted: " + username);
                     } catch (Exception e) {
                         System.out.println("Token validation error: " + e.getMessage());
                         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                        response.getWriter().write("Invalid token: " + e.getMessage());
+                        response.getWriter().write("{\"error\": \"Invalid token: " + e.getMessage() + "\"}");
                         return;
                     }
                 } else {
                     System.out.println("Empty token after Bearer prefix");
                     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    response.getWriter().write("Empty token");
+                    response.getWriter().write("{\"error\": \"Empty token\"}");
                     return;
+                }
+            } else {
+                // For debugging purposes, log when no auth header is present
+                // This is normal for public endpoints
+                if (!request.getRequestURI().contains("/auth/") && 
+                    !request.getRequestURI().contains("/uploads/") && 
+                    !request.getRequestURI().contains("/images/")) {
+                    System.out.println("No Authorization header for: " + request.getRequestURI());
                 }
             }
 
@@ -68,7 +87,7 @@ public class JwtFilter extends OncePerRequestFilter {
                 } else {
                     System.out.println("Token validation failed for user: " + username);
                     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    response.getWriter().write("Token validation failed");
+                    response.getWriter().write("{\"error\": \"Token validation failed\"}");
                     return;
                 }
             }
@@ -78,7 +97,7 @@ public class JwtFilter extends OncePerRequestFilter {
             System.out.println("Error in JWT filter: " + e.getMessage());
             e.printStackTrace();
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("Authentication error: " + e.getMessage());
+            response.getWriter().write("{\"error\": \"Authentication error: " + e.getMessage() + "\"}");
         }
     }
 }

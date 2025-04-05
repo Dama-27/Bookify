@@ -58,6 +58,12 @@ public class JWTService {
         if (token.isEmpty()) {
             throw new IllegalArgumentException("Token cannot be empty");
         }
+        
+        // Remove any whitespace
+        if (token.contains(" ")) {
+            token = token.replaceAll("\\s+", "");
+        }
+        
         return extractClaim(token, Claims::getSubject);
     }
 
@@ -68,24 +74,31 @@ public class JWTService {
 
     private Claims extractAllClaims(String token) {
         try {
+            // Log the token for debugging (only first few characters)
+            System.out.println("Validating token: " + token.substring(0, Math.min(token.length(), 10)) + "...");
+            
             return Jwts.parser()
                     .verifyWith(getKey())
                     .build()
                     .parseSignedClaims(token.trim())
                     .getPayload();
         } catch (Exception e) {
+            System.out.println("Token validation error: " + e.getMessage());
             throw new IllegalArgumentException("Invalid token format: " + e.getMessage());
         }
     }
 
     public boolean validateToken(String token, UserDetails userDetails) {
         if (token == null || userDetails == null) {
+            System.out.println("Token or userDetails is null");
             return false;
         }
         try {
             token = token.trim();
             final String userName = extractUserName(token);
-            return (userName.equals(userDetails.getUsername()) && !isTokenExpired(token));
+            boolean isValid = userName.equals(userDetails.getUsername()) && !isTokenExpired(token);
+            System.out.println("Token validation result: " + isValid + " for user: " + userName);
+            return isValid;
         } catch (Exception e) {
             System.out.println("Token validation failed: " + e.getMessage());
             return false;

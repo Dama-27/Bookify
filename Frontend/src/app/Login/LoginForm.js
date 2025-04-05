@@ -149,7 +149,7 @@ const LoginForm = ({ userType = "consumer", resetPassword = false }) => {
       const loginData = {
         email: formData.email,
         password: formData.password,
-        role: userType === "consumer" ? "consumers" : "service_providers",
+        role: userType === "consumer" ? "consumer" : "service-provider",
       };
 
       console.log("Attempting login with data:", loginData);
@@ -160,8 +160,7 @@ const LoginForm = ({ userType = "consumer", resetPassword = false }) => {
         localStorage.setItem("token", response.token);
 
         // Store user role
-        const role =
-          userType === "consumer" ? "consumers" : "service_providers";
+        const role = userType === "consumer" ? "consumer" : "service-provider";
         localStorage.setItem("userRole", role);
 
         // Store complete user data
@@ -171,6 +170,18 @@ const LoginForm = ({ userType = "consumer", resetPassword = false }) => {
             role: role,
           };
           localStorage.setItem("userInfo", JSON.stringify(userInfo));
+
+          // Store user ID in localStorage
+          if (response.user.client_id) {
+            localStorage.setItem("userId", response.user.client_id);
+            console.log(
+              "User ID stored in localStorage:",
+              response.user.client_id
+            );
+          } else if (response.user.id) {
+            localStorage.setItem("userId", response.user.id);
+            console.log("User ID stored in localStorage:", response.user.id);
+          }
         }
 
         toast.success("Login successful!");

@@ -6,37 +6,50 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class FileUploadService {
     
-    private final String uploadDir = "uploads/profile-images/";
+    private static final Logger logger = LoggerFactory.getLogger(FileUploadService.class);
+    
+    @Value("${app.upload.dir:${user.home}/uploads}")
+    private String uploadDir;
+    
+    private final String profileImagesDir = "profile-images/";
     
     public FileUploadService() {
-        // Create upload directory if it doesn't exist
-        try {
-            Path uploadPath = Paths.get(uploadDir);
-            if (!Files.exists(uploadPath)) {
-                Files.createDirectories(uploadPath);
-            }
-        } catch (IOException e) {
-            throw new RuntimeException("Could not create upload directory!", e);
-        }
+        // Directory creation will be handled in the uploadFile method
     }
 
     public String uploadFile(MultipartFile file) throws IOException {
+        // Create the full upload directory path
+        String fullUploadDir = uploadDir + "/" + profileImagesDir;
+        Path uploadPath = Paths.get(fullUploadDir);
+        
+        // Create directories if they don't exist
+        if (!Files.exists(uploadPath)) {
+            logger.info("Creating upload directory: {}", uploadPath);
+            Files.createDirectories(uploadPath);
+        }
+        
         // Generate unique filename
         String originalFilename = file.getOriginalFilename();
         String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
         String newFilename = UUID.randomUUID().toString() + extension;
         
         // Save file
-        Path filePath = Paths.get(uploadDir + newFilename);
+        Path filePath = uploadPath.resolve(newFilename);
+        logger.info("Saving file to: {}", filePath);
         Files.copy(file.getInputStream(), filePath);
         
         // Return the URL to access the file
-        return "/uploads/profile-images/" + newFilename;
+        String imageUrl = "/uploads/" + profileImagesDir + newFilename;
+        logger.info("File uploaded successfully. URL: {}", imageUrl);
+        return imageUrl;
     }
 } 

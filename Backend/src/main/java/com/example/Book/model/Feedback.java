@@ -1,7 +1,14 @@
 package com.example.Book.model;
 
+import java.time.LocalDateTime;
 import java.util.Date;
+
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "feedback")
@@ -10,7 +17,15 @@ public class Feedback {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long feedbackId;
 
-    private String name;
+    // Link to the Consumer (client_id)
+    @ManyToOne
+    @JoinColumn(name = "client_id", nullable = false) // Ensure column name matches database
+    private Consumer consumer;
+
+    // Link to the Booking (booking_id)
+    @ManyToOne
+    @JoinColumn(name = "booking_id", nullable = false) // Ensure column name matches database
+    private Booking booking;
 
     @Column(columnDefinition = "TEXT")
     private String comments;
@@ -23,8 +38,9 @@ public class Feedback {
     public Feedback() {
     }
 
-    public Feedback(String name, String comments, int rating) {
-        this.name = name;
+    public Feedback(Consumer consumer, Booking booking, String comments, int rating) {
+        this.consumer = consumer;
+        this.booking = booking;
         this.comments = comments;
         this.rating = rating;
         this.responseDate = new Date();
@@ -39,12 +55,20 @@ public class Feedback {
         this.feedbackId = feedbackId;
     }
 
-    public String getName() {
-        return name;
+    public Consumer getConsumer() {
+        return consumer;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setConsumer(Consumer consumer) {
+        this.consumer = consumer;
+    }
+
+    public Booking getBooking() {
+        return booking;
+    }
+
+    public void setBooking(Booking booking) {
+        this.booking = booking;
     }
 
     public String getComments() {

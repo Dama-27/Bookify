@@ -1,5 +1,7 @@
 export const BASE_URL = "http://localhost:8081/";
 
+const API_BASE_URL = "http://localhost:8081/api/consumer";
+
 // Helper function to handle API responses
 const handleResponse = async (response) => {
   const contentType = response.headers.get("content-type");
@@ -49,18 +51,19 @@ const handleNetworkError = (error) => {
   throw error;
 };
 
-// Helper function to get clean token
-const getCleanToken = () => {
-  const token = localStorage.getItem("token");
-  if (!token) {
-    throw new Error("Authentication required");
-  }
-  // Remove any whitespace and Bearer prefix
-  const cleanToken = token.replace(/^Bearer\s+/, "").trim();
-  if (!cleanToken) {
-    throw new Error("Invalid token format");
-  }
-  return cleanToken;
+// Helper function to clean token - remove any invalid characters
+const cleanToken = (token) => {
+  if (!token) return "";
+
+  // Remove 'Bearer ' prefix if present
+  let cleanedToken = token.replace(/^Bearer\s+/i, "");
+
+  // Remove any whitespace
+  cleanedToken = cleanedToken.trim();
+
+  console.log("Token cleaned:", cleanedToken.substring(0, 10) + "...");
+
+  return cleanedToken;
 };
 
 // Helper function to handle auth errors
@@ -150,15 +153,11 @@ export const registercustomer = async (formData) => {
 
 // Login endpoints
 export const loginUser = async (formData) => {
-  const endpoint = "auth/login";
-
-  console.log("Login request:", {
-    url: `${BASE_URL}${endpoint}`,
-    data: formData,
-  });
-
   try {
-    const response = await fetch(`${BASE_URL}${endpoint}`, {
+    console.log("Login request URL:", `${API_BASE_URL}/auth/login`);
+    console.log("Login data:", formData);
+
+    const response = await fetch(`${API_BASE_URL}/auth/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -168,41 +167,56 @@ export const loginUser = async (formData) => {
       body: JSON.stringify(formData),
     });
 
-    if (response.status === 401 || response.status === 403) {
-      throw new Error(
-        "Incorrect credentials. Please check your email and password."
-      );
+    // Log the response status and headers for debugging
+    console.log("Login response status:", response.status);
+    console.log(
+      "Login response headers:",
+      Object.fromEntries(response.headers.entries())
+    );
+
+    // Check if the response is empty
+    const responseText = await response.text();
+    console.log("Login response text:", responseText);
+
+    if (!response.ok) {
+      try {
+        const errorData = JSON.parse(responseText);
+        throw new Error(errorData.error || "Login failed");
+      } catch (e) {
+        throw new Error(
+          `Login failed: ${response.status} ${response.statusText}`
+        );
+      }
     }
 
-    const data = await handleResponse(response);
+    // Parse the response text as JSON
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (e) {
+      console.error("Error parsing login response:", e);
+      throw new Error("Invalid response from server");
+    }
+
     console.log("Login response data:", data);
 
+    // Clean and store the token
     if (data.token) {
-      const cleanToken = data.token.replace(/^Bearer\s+/, "").trim();
-      if (!cleanToken) {
-        throw new Error("Invalid token received from server");
-      }
-      localStorage.setItem("token", cleanToken);
-      console.log("Token stored in localStorage:", cleanToken);
+      const token = data.token.replace("Bearer ", "").trim();
+      localStorage.setItem("token", token);
+      console.log("Stored token in localStorage");
+    }
 
-      if (data.user) {
-        localStorage.setItem("userInfo", JSON.stringify(data.user));
-        console.log("User info stored in localStorage:", data.user);
-      }
-
-      const userRole =
-        formData.role === "consumers" ? "consumer" : "service-provider";
-      localStorage.setItem("userRole", userRole);
-      console.log("User role stored in localStorage:", userRole);
-    } else {
-      console.error("No token received in login response");
-      throw new Error("Login failed: No token received");
+    // Store user info
+    if (data.user) {
+      localStorage.setItem("userInfo", JSON.stringify(data.user));
+      console.log("Stored user info in localStorage");
     }
 
     return data;
   } catch (error) {
     console.error("Login error:", error);
-    return handleNetworkError(error);
+    throw error;
   }
 };
 
@@ -270,7 +284,7 @@ export const getUserRole = () => {
 // Helper function to get auth header
 export const getAuthHeader = () => {
   try {
-    const token = getCleanToken();
+    const token = cleanToken(localStorage.getItem("token"));
     return { Authorization: `Bearer ${token}` };
   } catch (error) {
     console.error("Error getting auth header:", error);
@@ -407,7 +421,7 @@ export const createBooking = async (bookingData) => {
 // Update service provider profile
 export const updateServiceProviderProfile = async (profileData) => {
   try {
-    const token = getCleanToken();
+    const token = cleanToken(localStorage.getItem("token"));
     console.log("Sending profile update with data:", profileData);
 
     const response = await fetch(`${BASE_URL}api/service-providers/profile`, {
@@ -473,14 +487,15 @@ export const fetchUserProfile = async () => {
   }
 
   try {
-    const authToken = token.startsWith("Bearer ") ? token : `Bearer ${token}`;
-    console.log("Fetching user profile with token:", authToken);
+    // Clean the token - remove any whitespace and ensure no 'Bearer ' prefix
+    const cleanToken = token.replace(/^Bearer\s+/i, "").trim();
+    console.log("Using cleaned token for authentication");
 
     const response = await fetch(`${BASE_URL}api/users/profile`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: authToken,
+        Authorization: `Bearer ${cleanToken}`,
         Accept: "application/json",
       },
       credentials: "include",
@@ -535,14 +550,15 @@ export const fetchServiceProviderProfile = async () => {
   }
 
   try {
-    const authToken = token.startsWith("Bearer ") ? token : `Bearer ${token}`;
-    console.log("Fetching service provider profile with token:", authToken);
+    // Clean the token - remove any whitespace and ensure no 'Bearer ' prefix
+    const cleanToken = token.replace(/^Bearer\s+/i, "").trim();
+    console.log("Using cleaned token for authentication");
 
     const response = await fetch(`${BASE_URL}api/service-providers/profile`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: authToken,
+        Authorization: `Bearer ${cleanToken}`,
         Accept: "application/json",
       },
       credentials: "include",
@@ -591,7 +607,7 @@ export const fetchServiceProviderProfile = async () => {
 // Service Management APIs
 export const fetchProviderServices = async () => {
   try {
-    const token = getCleanToken();
+    const token = cleanToken(localStorage.getItem("token"));
     const response = await fetch(`${BASE_URL}api/service-providers/services`, {
       method: "GET",
       headers: {
@@ -618,7 +634,7 @@ export const fetchProviderServices = async () => {
 
 export const updateProviderService = async (serviceData) => {
   try {
-    const token = getCleanToken();
+    const token = cleanToken(localStorage.getItem("token"));
     const response = await fetch(`${BASE_URL}api/service-providers/services`, {
       method: "PUT",
       headers: {
@@ -669,4 +685,138 @@ export const resetPassword = async (email, oldPassword, newPassword) => {
     console.error("Password reset error:", error);
     throw new Error(error.message || "Failed to reset password");
   }
+};
+
+export const userService = {
+  async getCurrentUser(userId) {
+    try {
+      // Get token from localStorage
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("Authentication token not found");
+      }
+
+      // Clean the token - remove any whitespace and ensure no 'Bearer ' prefix
+      const cleanAuthToken = cleanToken(token);
+      console.log("Using cleaned token for authentication");
+
+      // Make API request with authentication header
+      const response = await fetch(`${API_BASE_URL}/${userId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${cleanAuthToken}`,
+          Accept: "application/json",
+        },
+        credentials: "include",
+      });
+
+      // Check if response is ok
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Error fetching user data:", {
+          status: response.status,
+          statusText: response.statusText,
+          body: errorText,
+        });
+
+        // Try to parse the error as JSON
+        try {
+          const errorJson = JSON.parse(errorText);
+          throw new Error(
+            errorJson.error ||
+              `Failed to fetch user data: ${response.status} ${response.statusText}`
+          );
+        } catch (e) {
+          throw new Error(
+            `Failed to fetch user data: ${response.status} ${response.statusText}`
+          );
+        }
+      }
+
+      // Parse and return the response
+      const data = await response.json();
+      console.log("User data fetched successfully:", data);
+
+      // Map the backend data to match frontend structure
+      const mappedData = {
+        username: data.username || "",
+        email: data.email || "",
+        phone: data.phone || "",
+        notes: data.notes || "",
+        address:
+          data.address ||
+          JSON.stringify({
+            country: "",
+            city: "",
+            district: "",
+            postalCode: "",
+          }),
+        client_id: data.client_id,
+        status: data.status,
+      };
+
+      return mappedData;
+    } catch (error) {
+      console.error("Error in getCurrentUser:", error);
+      throw error;
+    }
+  },
+
+  async updateUser(userId, userData) {
+    try {
+      // Get token from localStorage
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("Authentication token not found");
+      }
+
+      // Clean the token - remove any whitespace and ensure no 'Bearer ' prefix
+      const cleanAuthToken = cleanToken(token);
+      console.log("Using cleaned token for authentication");
+
+      // Make API request with authentication header
+      const response = await fetch(`${API_BASE_URL}/${userId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${cleanAuthToken}`,
+          Accept: "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(userData),
+      });
+
+      // Check if response is ok
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Error updating user data:", {
+          status: response.status,
+          statusText: response.statusText,
+          body: errorText,
+        });
+
+        // Try to parse the error as JSON
+        try {
+          const errorJson = JSON.parse(errorText);
+          throw new Error(
+            errorJson.error ||
+              `Failed to update user data: ${response.status} ${response.statusText}`
+          );
+        } catch (e) {
+          throw new Error(
+            `Failed to update user data: ${response.status} ${response.statusText}`
+          );
+        }
+      }
+
+      // Parse and return the response
+      const data = await response.json();
+      console.log("User data updated successfully:", data);
+      return data;
+    } catch (error) {
+      console.error("Error in updateUser:", error);
+      throw error;
+    }
+  },
 };

@@ -1,9 +1,5 @@
 package com.example.Book.service;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -13,19 +9,22 @@ import com.example.Book.model.ServiceProvider;
 import com.example.Book.repo.ConsumerRepository;
 import com.example.Book.repo.ServiceProviderRepository;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
 @Service
 public class UserService {
-
-    @Autowired
-    private ServiceProviderRepository serviceProviderRepository;
-
     @Autowired
     private ConsumerRepository consumerRepository;
-
+    
+    @Autowired
+    private ServiceProviderRepository serviceProviderRepository;
+    
     @Autowired
     private JWTService jwtService;
-
-    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    
+    private final BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
 
     // Register Service Provider with password hashing
     public String registerServiceProvider(ServiceProvider provider) {
@@ -34,7 +33,7 @@ public class UserService {
             throw new RuntimeException("Service Provider already exists!");
         }
         try {
-            provider.setPassword(passwordEncoder.encode(provider.getPassword()));
+            provider.setPassword(bCryptPasswordEncoder.encode(provider.getPassword()));
             serviceProviderRepository.save(provider);
             return "Service Provider registered successfully!";
         } catch (Exception e) {
@@ -49,7 +48,7 @@ public class UserService {
             throw new RuntimeException("Email already registered!");
         }
         try {
-            consumer.setPassword(passwordEncoder.encode(consumer.getPassword()));
+            consumer.setPassword(bCryptPasswordEncoder.encode(consumer.getPassword()));
             consumerRepository.save(consumer);
             return "Consumer registered successfully!";
         } catch (Exception e) {
@@ -61,29 +60,65 @@ public class UserService {
     public Map<String, Object> loginUser(String email, String password) {
         Map<String, Object> response = new HashMap<>();
         
-        Optional<Consumer> consumerOpt = consumerRepository.findByEmail(email);
-        if (consumerOpt.isPresent()) {
-            Consumer consumer = consumerOpt.get();
-            if (passwordEncoder.matches(password, consumer.getPassword())) {
-                response.put("token", jwtService.generateToken(email));
-                response.put("userData", consumer);
-                response.put("role", "consumer");
-                return response;
+        System.out.println("Login attempt for email: " + email);
+        
+        try {
+            // Try to find consumer first
+            Optional<Consumer> consumerOpt = consumerRepository.findByEmail(email);
+            if (consumerOpt.isPresent()) {
+                Consumer consumer = consumerOpt.get();
+                if (bCryptPasswordEncoder.matches(password, consumer.getPassword())) {
+                    String token = jwtService.generateToken(email);
+                    
+                    Map<String, Object> userData = new HashMap<>();
+                    userData.put("id", consumer.getClient_id());
+                    userData.put("email", consumer.getEmail());
+                    userData.put("username", consumer.getUsername());
+                    userData.put("phone", consumer.getPhone());
+                    userData.put("address", consumer.getAddress());
+                    userData.put("bio", consumer.getBio());
+                    userData.put("notes", consumer.getNotes());
+                    
+                    response.put("token", token);
+                    response.put("userData", userData);
+                    response.put("role", "consumer");
+                    return response;
+                }
             }
-        }
-
-        Optional<ServiceProvider> providerOpt = serviceProviderRepository.findByEmail(email);
-        if (providerOpt.isPresent()) {
-            ServiceProvider provider = providerOpt.get();
-            if (passwordEncoder.matches(password, provider.getPassword())) {
-                response.put("token", jwtService.generateToken(email));
-                response.put("userData", provider);
-                response.put("role", "service-provider");
-                return response;
+            
+            // Try to find service provider
+            Optional<ServiceProvider> providerOpt = serviceProviderRepository.findByEmail(email);
+            if (providerOpt.isPresent()) {
+                ServiceProvider provider = providerOpt.get();
+                if (bCryptPasswordEncoder.matches(password, provider.getPassword())) {
+                    String token = jwtService.generateToken(email);
+                    
+                    Map<String, Object> userData = new HashMap<>();
+                    userData.put("id", provider.getProvider_id());
+                    userData.put("email", provider.getEmail());
+                    userData.put("username", provider.getUsername());
+                    userData.put("firstName", provider.getFirstName());
+                    userData.put("lastName", provider.getLastName());
+                    userData.put("contact", provider.getContact());
+                    userData.put("address", provider.getAddress());
+                    userData.put("bio", provider.getBio());
+                    userData.put("experience", provider.getExperience());
+                    userData.put("isActive", provider.getIsActive());
+                    userData.put("profileImage", provider.getProfileImage());
+                    
+                    response.put("token", token);
+                    response.put("userData", userData);
+                    response.put("role", "service-provider");
+                    return response;
+                }
             }
+            
+            throw new RuntimeException("Invalid email or password");
+            
+        } catch (Exception e) {
+            System.out.println("Login failed: " + e.getMessage());
+            throw new RuntimeException("Login failed: " + e.getMessage());
         }
-
-        throw new RuntimeException("Invalid email or password!");
     }
 
     public Optional<?> getUserByEmail(String email) {
@@ -106,12 +141,12 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("Service provider not found"));
 
         // Verify old password using BCrypt
-        if (!passwordEncoder.matches(oldPassword, provider.getPassword())) {
+        if (!bCryptPasswordEncoder.matches(oldPassword, provider.getPassword())) {
             throw new RuntimeException("Current password is incorrect");
         }
 
         // Hash and update new password
-        provider.setPassword(passwordEncoder.encode(newPassword));
+        provider.setPassword(bCryptPasswordEncoder.encode(newPassword));
         serviceProviderRepository.save(provider);
 
         return "Password updated successfully";

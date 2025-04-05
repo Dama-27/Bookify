@@ -43,6 +43,13 @@ const ServiceDetails = ({ serviceData }) => {
     { key: "sunday", label: "Sunday" },
   ];
 
+  // Add category options
+  const categoryOptions = [
+    { value: "Doctor", label: "Doctor" },
+    { value: "Teacher", label: "Teacher" },
+    { value: "Fitness Coach", label: "Fitness Coach" },
+  ];
+
   useEffect(() => {
     loadServiceData();
   }, []);
@@ -251,13 +258,18 @@ const ServiceDetails = ({ serviceData }) => {
           <div>
             <label className="block text-gray-700 mb-1">Category</label>
             {editMode ? (
-              <input
-                type="text"
+              <select
                 name="category"
                 value={formData.category}
                 onChange={handleChange}
                 className="w-full border rounded-md p-2"
-              />
+              >
+                {categoryOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
             ) : (
               <p className="py-2">{formData.category || "Not specified"}</p>
             )}

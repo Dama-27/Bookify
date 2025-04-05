@@ -14,7 +14,7 @@ DROP COLUMN duration;
 
 -- Add new columns
 ALTER TABLE service_date_time
-ADD COLUMN work_hours_start VARCHAR(255) NOT NULL,
-ADD COLUMN work_hours_end VARCHAR(255) NOT NULL,
+ADD COLUMN work_hours_start TIME NOT NULL,
+ADD COLUMN work_hours_end TIME NOT NULL,
 ADD COLUMN working_days JSON,
 ADD COLUMN time_packages INT NOT NULL; 

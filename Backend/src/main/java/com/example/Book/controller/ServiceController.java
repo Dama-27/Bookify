@@ -1,5 +1,8 @@
 package com.example.Book.controller;
 
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +46,8 @@ public class ServiceController {
     @Autowired
     private JWTService jwtService;
 
+    private final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+
     @GetMapping("/services")
     public ResponseEntity<List<Map<String, Object>>> getProviderServices(@RequestHeader("Authorization") String token) {
         String email = extractEmailFromToken(token);
@@ -54,7 +59,7 @@ public class ServiceController {
         // Convert services to include ServiceDateTime information
         List<Map<String, Object>> servicesWithDateTime = services.stream().map(service -> {
             Map<String, Object> serviceMap = new HashMap<>();
-            serviceMap.put("serviceId", service.getService_id());
+            serviceMap.put("serviceId", service.getServiceId());
             serviceMap.put("name", service.getName());
             serviceMap.put("specialization", service.getSpecialization());
             serviceMap.put("price", service.getPrice());
@@ -67,8 +72,8 @@ public class ServiceController {
             
             if (serviceDateTime != null) {
                 serviceMap.put("workHours", Map.of(
-                    "start", serviceDateTime.getWorkHoursStart(),
-                    "end", serviceDateTime.getWorkHoursEnd()
+                    "start", serviceDateTime.getWorkHoursStart().toLocalTime().format(timeFormatter),
+                    "end", serviceDateTime.getWorkHoursEnd().toLocalTime().format(timeFormatter)
                 ));
                 
                 try {
@@ -111,8 +116,16 @@ public class ServiceController {
 
         @SuppressWarnings("unchecked")
         Map<String, String> workHours = (Map<String, String>) serviceData.get("workHours");
-        serviceDateTime.setWorkHoursStart(workHours.get("start"));
-        serviceDateTime.setWorkHoursEnd(workHours.get("end"));
+        
+        // Convert time strings to LocalDateTime with today's date
+        LocalTime startTime = LocalTime.parse(workHours.get("start"), timeFormatter);
+        LocalTime endTime = LocalTime.parse(workHours.get("end"), timeFormatter);
+        
+        LocalDateTime startDateTime = LocalDateTime.now().with(startTime);
+        LocalDateTime endDateTime = LocalDateTime.now().with(endTime);
+        
+        serviceDateTime.setWorkHoursStart(startDateTime);
+        serviceDateTime.setWorkHoursEnd(endDateTime);
         
         @SuppressWarnings("unchecked")
         Map<String, Boolean> workingDays = (Map<String, Boolean>) serviceData.get("workingDays");
@@ -174,8 +187,16 @@ public class ServiceController {
 
         @SuppressWarnings("unchecked")
         Map<String, String> workHours = (Map<String, String>) serviceData.get("workHours");
-        serviceDateTime.setWorkHoursStart(workHours.get("start"));
-        serviceDateTime.setWorkHoursEnd(workHours.get("end"));
+        
+        // Convert time strings to LocalDateTime with today's date
+        LocalTime startTime = LocalTime.parse(workHours.get("start"), timeFormatter);
+        LocalTime endTime = LocalTime.parse(workHours.get("end"), timeFormatter);
+        
+        LocalDateTime startDateTime = LocalDateTime.now().with(startTime);
+        LocalDateTime endDateTime = LocalDateTime.now().with(endTime);
+        
+        serviceDateTime.setWorkHoursStart(startDateTime);
+        serviceDateTime.setWorkHoursEnd(endDateTime);
         
         @SuppressWarnings("unchecked")
         Map<String, Boolean> workingDays = (Map<String, Boolean>) serviceData.get("workingDays");

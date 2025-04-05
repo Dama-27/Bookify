@@ -1,5 +1,7 @@
 package com.example.Book.model;
 
+import java.time.LocalDateTime;
+
 import org.springframework.web.bind.annotation.CrossOrigin;
 
 import jakarta.persistence.Column;
@@ -29,10 +31,10 @@ public class ServiceDateTime {
 
     // Working hours
     @Column(name = "work_hours_start", nullable = false)
-    private String workHoursStart;
+    private LocalDateTime workHoursStart;
 
     @Column(name = "work_hours_end", nullable = false)
-    private String workHoursEnd;
+    private LocalDateTime workHoursEnd;
 
     // Working days stored as JSON
     @Column(name = "working_days", columnDefinition = "json")

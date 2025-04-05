@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
-import Button from "../../components/ui/button";
-import "../../styles/Home.css";
+import Button from "./button";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import image3 from "../../images/Frame 1321314484.png";
 import { fetchUserProfile } from "../../services/api";

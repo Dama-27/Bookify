@@ -156,27 +156,21 @@ const LoginForm = ({ userType = "consumer", resetPassword = false }) => {
       const response = await loginUser(loginData);
 
       if (response.token) {
-        // Store user info with consistent role naming
+        // Store token
         localStorage.setItem("token", response.token);
-        localStorage.setItem(
-          "userRole",
-          userType === "consumer" ? "consumers" : "service_providers"
-        );
 
+        // Store user role
+        const role =
+          userType === "consumer" ? "consumers" : "service_providers";
+        localStorage.setItem("userRole", role);
+
+        // Store complete user data
         if (response.user) {
           const userInfo = {
             ...response.user,
-            name: response.user.username,
-            role: userType === "consumer" ? "consumers" : "service_providers",
+            role: role,
           };
           localStorage.setItem("userInfo", JSON.stringify(userInfo));
-        } else {
-          localStorage.setItem(
-            "userInfo",
-            JSON.stringify({
-              role: userType === "consumer" ? "consumers" : "service_providers",
-            })
-          );
         }
 
         toast.success("Login successful!");
@@ -198,9 +192,9 @@ const LoginForm = ({ userType = "consumer", resetPassword = false }) => {
         );
       }
     } catch (error) {
-      console.error("Login failed:", error);
-      toast.error(error.message || "Login failed. Please try again.");
-      setError(error.message || "Login failed. Please check your credentials.");
+      console.error("Login error:", error);
+      toast.error(error.message || "An error occurred during login");
+      setError(error.message || "An error occurred during login");
     } finally {
       setIsLoading(false);
     }

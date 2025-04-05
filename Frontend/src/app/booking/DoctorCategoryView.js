@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
-const DoctorCategoryView = () => {
+const CommonCategoryView = () => {
   const [providers, setProviders] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
@@ -10,36 +10,23 @@ const DoctorCategoryView = () => {
     fetch("http://localhost:8081/api/booking/providers")
       .then((response) => response.json())
       .then((data) => {
-        console.log("Received providers data:", data);
         const filteredProviders = data
           .filter((provider) =>
-            provider.services?.some((service) => service.category === "Doctor")
+            provider.services.some((service) => service.category === "Doctor")
           )
-          .map((provider) => {
-            console.log("Processing provider:", provider);
-            return {
-              id: provider.provider_id,
-              name: provider.username,
-              firstName: provider.firstName,
-              lastName: provider.lastName,
-              service:
-                provider.services?.length > 0
-                  ? provider.services[0].name
-                  : "No Service",
-              category: "Doctor",
-              profileImage: provider.profileImage
-                ? provider.profileImage.startsWith("http")
-                  ? provider.profileImage
-                  : provider.profileImage.startsWith("data:image")
-                  ? provider.profileImage
-                  : `http://localhost:8081/uploads/${provider.profileImage.replace(
-                      /^\/+/,
-                      ""
-                    )}`
-                : "http://localhost:8081/images/default-avatar.png",
-            };
-          });
-        console.log("Filtered providers:", filteredProviders);
+          .map((provider) => ({
+            id: provider.providerId,
+            firstName: provider.firstName,
+            lastName: provider.lastName,
+            specialization:
+              provider.services[0]?.specialization || "No Service",
+            image:
+              provider.profileImage ||
+              `https://via.placeholder.com/48?text=${provider.username.charAt(
+                0
+              )}`,
+          }));
+
         setProviders(filteredProviders);
       })
       .catch((error) => console.error("Error fetching providers:", error));
@@ -51,88 +38,61 @@ const DoctorCategoryView = () => {
     currentPage * itemsPerPage
   );
 
-  const handleImageError = (e) => {
-    const originalSrc = e.target.src;
-    console.log("Image failed to load:", originalSrc);
-    e.target.onerror = null; // Prevent infinite loop
-
-    // If the original source was already the default avatar, don't try to load it again
-    if (originalSrc.includes("default-avatar.png")) {
-      console.log("Default avatar also failed to load");
-      return;
-    }
-
-    // Try loading the default avatar
-    const defaultAvatar = "http://localhost:8081/images/default-avatar.png";
-    console.log("Attempting to load default avatar:", defaultAvatar);
-    e.target.src = defaultAvatar;
-  };
-
   return (
     <div className="bg-blue-50 rounded-3xl p-8">
-      <h3 className="text-2xl font-semibold mb-6">Doctor Services</h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <h3 className="text-2xl font-semibold mb-6 text-gray-800">
+        Available Doctors
+      </h3>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {currentProviders.map((provider) => (
           <div
             key={provider.id}
-            className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow"
+            className="bg-white rounded-xl shadow-md p-6 flex flex-col items-center text-center hover:shadow-lg transition-shadow"
           >
-            <div className="flex flex-col items-center">
-              {/* Profile Image Container */}
-              <div className="w-24 h-24 mb-4">
-                <img
-                  src={provider.profileImage}
-                  alt={`${provider.name}'s profile`}
-                  onError={handleImageError}
-                  className="w-full h-full rounded-full object-cover border-4 border-cyan-100"
-                />
-              </div>
-
-              {/* Provider Info */}
-              <div className="text-center mb-4">
-                <h4 className="text-xl font-semibold text-gray-800">
-                  {provider.name}
-                </h4>
-                <p className="text-gray-600">
-                  {provider.firstName} {provider.lastName}
-                </p>
-                <p className="text-cyan-500 font-medium">{provider.service}</p>
-                <p className="text-sm text-gray-500">{provider.category}</p>
-              </div>
-
-              {/* Book Now Button */}
-              <Link
-                to={`/clientbookingpage?provider=${provider.id}`}
-                className="inline-flex items-center px-6 py-2 bg-cyan-400 text-white rounded-full hover:bg-cyan-500 transition-colors"
-              >
-                Book Now
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-4 w-4 ml-2"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M14 5l7 7m0 0l-7 7m7-7H3"
-                  />
-                </svg>
-              </Link>
+            <div className="w-20 h-20 rounded-full overflow-hidden mb-4 border-4 border-cyan-100">
+              <img
+                src={provider.image}
+                alt={`${provider.firstName} ${provider.lastName}`}
+                className="w-full h-full object-cover"
+              />
             </div>
+            <h4 className="text-lg font-semibold text-gray-800">
+              {provider.firstName} {provider.lastName}
+            </h4>
+            <p className="text-gray-600 text-sm mb-4">
+              {provider.specialization}
+            </p>
+            <Link
+              to={`/clientbookingpage?provider=${provider.id}`}
+              className="bg-cyan-400 text-white px-5 py-2 rounded-full text-sm hover:bg-cyan-500 transition-colors flex items-center gap-2"
+            >
+              Book Now
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M14 5l7 7m0 0l-7 7m7-7H3"
+                />
+              </svg>
+            </Link>
           </div>
         ))}
       </div>
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex justify-center mt-8 gap-2">
+        <div className="flex justify-center mt-6 gap-2">
           {currentPage > 1 && (
             <button
               onClick={() => setCurrentPage(currentPage - 1)}
-              className="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              className="bg-gray-300 px-4 py-2 rounded-l-lg"
             >
               Previous
             </button>
@@ -141,11 +101,11 @@ const DoctorCategoryView = () => {
             <button
               key={index + 1}
               onClick={() => setCurrentPage(index + 1)}
-              className={`px-4 py-2 rounded-lg transition-colors ${
+              className={`px-4 py-2 ${
                 currentPage === index + 1
                   ? "bg-cyan-500 text-white"
-                  : "bg-white border border-gray-300 hover:bg-gray-50"
-              }`}
+                  : "bg-gray-300"
+              } rounded-md`}
             >
               {index + 1}
             </button>
@@ -153,7 +113,7 @@ const DoctorCategoryView = () => {
           {currentPage < totalPages && (
             <button
               onClick={() => setCurrentPage(currentPage + 1)}
-              className="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              className="bg-gray-300 px-4 py-2 rounded-r-lg"
             >
               Next
             </button>
@@ -164,4 +124,4 @@ const DoctorCategoryView = () => {
   );
 };
 
-export default DoctorCategoryView;
+export default CommonCategoryView;

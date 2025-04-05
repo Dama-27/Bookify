@@ -79,7 +79,8 @@ public class BookingService {
                 provider.getContact(),
                 provider.getExperience(),
                 provider.getIsActive(),
-                serviceDTOs
+                serviceDTOs,
+                provider.getProfileImage()  // Add the image parameter
         );
     }
 

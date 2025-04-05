@@ -39,7 +39,8 @@ public class SecurityConfig {
                 .requestMatchers("/uploads/**", "/default-avatar.png").permitAll()
                 .requestMatchers("/api/booking/providers", "/api/booking/providers/**").permitAll()
                 .requestMatchers("/images/**").permitAll()
-                .anyRequest().authenticated()
+                //.anyRequest().authenticated()
+                    .anyRequest().permitAll()
             )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

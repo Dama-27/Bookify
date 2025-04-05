@@ -118,9 +118,14 @@ const LoginForm = ({ userType = "consumer", resetPassword = false }) => {
           const userInfo = {
             ...response.user,
             name: response.user.username,
+            client_id: response.user.id,
             role: userType === "consumer" ? "consumers" : "service_providers",
           };
           localStorage.setItem("userInfo", JSON.stringify(userInfo));
+
+          if (response.user.id) {
+            localStorage.setItem("clientId", response.user.id); // Assuming `id` is the clientId
+          }
         } else {
           localStorage.setItem("userInfo", JSON.stringify({}));
         }

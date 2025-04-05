@@ -64,4 +64,10 @@ public class BookingController {
         return bookingService.getServiceDateTimeByProviderId(providerId);
     }
 
+    @GetMapping("/provider/{providerId}/details")
+    public ResponseEntity<ServiceProviderDTO> getServiceProviderDetails(@PathVariable Long providerId) {
+        ServiceProviderDTO providerDetails = bookingService.getServiceProviderDetailsById(providerId);
+        return ResponseEntity.ok(providerDetails);
+    }
+
 }

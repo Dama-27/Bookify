@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Navigation from "../../components/ui/navigation";
+import image1 from "../../../src/images/14ac423b-f383-4ab5-b624-4fb57e99b7ef.webp";
 
 const BookingForm = ({ bookingDetails, onSelectPaymentMethod }) => {
   const [activeSection, setActiveSection] = useState('details');
@@ -8,13 +9,10 @@ const BookingForm = ({ bookingDetails, onSelectPaymentMethod }) => {
     <div className="grid md:grid-cols-2 gap-8">
       <Navigation />
       <div className="flex items-center justify-center">
-        <div className="w-full max-w-md">
-          <img 
-            src="/api/placeholder/400/300" 
-            alt="Doctor booking on laptop" 
-            className="rounded-lg shadow-md"
-          />
-        </div>
+        <div
+            className="hidden md:block w-1/2 bg-cover bg-center"
+            style={{ backgroundImage: `url(${image1})` }}
+          ></div>
       </div>
 
       {/* Right Column - Form */}

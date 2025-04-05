@@ -37,4 +37,7 @@ public class Consumer {
 
     private String notes;
 
+    public Long getClientId() {
+        return client_id;
+    }
 }

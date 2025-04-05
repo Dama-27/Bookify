@@ -68,6 +68,7 @@ public class UserService {
                 response.put("token", jwtService.generateToken(email));
                 response.put("userData", consumer);
                 response.put("role", "consumer");
+
                 return response;
             }
         }

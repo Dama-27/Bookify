@@ -82,7 +82,6 @@ const handleAuthError = (error) => {
 export const registerservice = async (formData) => {
   const endpoint = "auth/service-provider/register";
 
-  // Add logging to debug the request
   console.log("Registration request:", {
     url: `${BASE_URL}${endpoint}`,
     data: formData,
@@ -117,7 +116,6 @@ export const registerservice = async (formData) => {
 export const registercustomer = async (formData) => {
   const endpoint = "auth/consumer/register";
 
-  // Add logging to debug the request
   console.log("Registration request:", {
     url: `${BASE_URL}${endpoint}`,
     data: formData,
@@ -180,7 +178,6 @@ export const loginUser = async (formData) => {
     console.log("Login response data:", data);
 
     if (data.token) {
-      // Store the clean token without Bearer prefix and whitespace
       const cleanToken = data.token.replace(/^Bearer\s+/, "").trim();
       if (!cleanToken) {
         throw new Error("Invalid token received from server");
@@ -211,7 +208,6 @@ export const loginUser = async (formData) => {
 
 export const loginWithGoogle = async () => {
   try {
-    // Replace with your actual Google OAuth endpoint
     const response = await fetch(`${BASE_URL}/auth/google`, {
       method: "GET",
       credentials: "include",
@@ -229,7 +225,6 @@ export const loginWithGoogle = async () => {
 
 export const loginWithGithub = async () => {
   try {
-    // Replace with your actual GitHub OAuth endpoint
     const response = await fetch(`${BASE_URL}/auth/github`, {
       method: "GET",
       credentials: "include",
@@ -247,7 +242,6 @@ export const loginWithGithub = async () => {
 
 export const loginWithFacebook = async () => {
   try {
-    // Replace with your actual Facebook OAuth endpoint
     const response = await fetch(`${BASE_URL}/auth/facebook`, {
       method: "GET",
       credentials: "include",
@@ -275,8 +269,13 @@ export const getUserRole = () => {
 
 // Helper function to get auth header
 export const getAuthHeader = () => {
-  const token = localStorage.getItem("token");
-  return token ? { Authorization: `Bearer ${token}` } : {};
+  try {
+    const token = getCleanToken();
+    return { Authorization: `Bearer ${token}` };
+  } catch (error) {
+    console.error("Error getting auth header:", error);
+    return {};
+  }
 };
 
 // Test connection to backend
@@ -301,7 +300,6 @@ export const fetchServiceProviders = async () => {
   }
 
   try {
-    // Updated endpoint to match backend convention
     const response = await fetch(`${BASE_URL}api/service-providers/all`, {
       method: "GET",
       headers: {
@@ -314,7 +312,6 @@ export const fetchServiceProviders = async () => {
 
     if (!response.ok) {
       if (response.status === 404) {
-        // If no providers found, return empty array instead of error
         return [];
       }
       throw new Error(`Failed to fetch service providers (${response.status})`);
@@ -351,7 +348,6 @@ export const fetchServiceProviderDetails = async (providerId) => {
 
     if (!response.ok) {
       if (response.status === 404) {
-        // Return empty object with default structure if provider not found
         return {
           name: "-",
           username: "-",
@@ -435,12 +431,10 @@ export const updateServiceProviderProfile = async (profileData) => {
         return handleAuthError(new Error(errorText || "Authentication failed"));
       }
 
-      // Try to parse error message if it's JSON
       try {
         const errorJson = JSON.parse(errorText);
         throw new Error(errorJson.message || errorText);
       } catch (e) {
-        // If parsing fails, throw the raw error text
         throw new Error(errorText || "Failed to update profile");
       }
     }
@@ -448,7 +442,6 @@ export const updateServiceProviderProfile = async (profileData) => {
     const updatedData = await response.json();
     console.log("Profile update success response:", updatedData);
 
-    // Update local storage with new data
     const userInfo = JSON.parse(localStorage.getItem("userInfo") || "{}");
     const newUserInfo = {
       ...userInfo,
@@ -480,7 +473,6 @@ export const fetchUserProfile = async () => {
   }
 
   try {
-    // Ensure token doesn't already have Bearer prefix
     const authToken = token.startsWith("Bearer ") ? token : `Bearer ${token}`;
     console.log("Fetching user profile with token:", authToken);
 
@@ -509,7 +501,6 @@ export const fetchUserProfile = async () => {
         headers: Object.fromEntries(response.headers.entries()),
       });
 
-      // If unauthorized, clear token and userInfo
       if (response.status === 401 || response.status === 403) {
         localStorage.removeItem("token");
         localStorage.removeItem("userInfo");
@@ -524,7 +515,6 @@ export const fetchUserProfile = async () => {
     const data = await response.json();
     console.log("Profile data received:", data);
 
-    // Update userInfo in localStorage with latest data
     if (data) {
       localStorage.setItem("userInfo", JSON.stringify(data));
     }
@@ -545,7 +535,6 @@ export const fetchServiceProviderProfile = async () => {
   }
 
   try {
-    // Ensure token doesn't already have Bearer prefix
     const authToken = token.startsWith("Bearer ") ? token : `Bearer ${token}`;
     console.log("Fetching service provider profile with token:", authToken);
 
@@ -574,7 +563,6 @@ export const fetchServiceProviderProfile = async () => {
         headers: Object.fromEntries(response.headers.entries()),
       });
 
-      // If unauthorized, clear token and userInfo
       if (response.status === 401 || response.status === 403) {
         localStorage.removeItem("token");
         localStorage.removeItem("userInfo");
@@ -589,7 +577,6 @@ export const fetchServiceProviderProfile = async () => {
     const data = await response.json();
     console.log("Profile data received:", data);
 
-    // Update userInfo in localStorage with latest data
     if (data) {
       localStorage.setItem("userInfo", JSON.stringify(data));
     }
@@ -598,5 +585,88 @@ export const fetchServiceProviderProfile = async () => {
   } catch (error) {
     console.error("Error fetching service provider profile:", error);
     throw error;
+  }
+};
+
+// Service Management APIs
+export const fetchProviderServices = async () => {
+  try {
+    const token = getCleanToken();
+    const response = await fetch(`${BASE_URL}api/service-providers/services`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      if (response.status === 401 || response.status === 403) {
+        return handleAuthError(new Error("Authentication failed"));
+      }
+      throw new Error(`Failed to fetch services (${response.status})`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching provider services:", error);
+    throw error;
+  }
+};
+
+export const updateProviderService = async (serviceData) => {
+  try {
+    const token = getCleanToken();
+    const response = await fetch(`${BASE_URL}api/service-providers/services`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(serviceData),
+    });
+
+    if (!response.ok) {
+      if (response.status === 401 || response.status === 403) {
+        return handleAuthError(new Error("Authentication failed"));
+      }
+      throw new Error(`Failed to update service (${response.status})`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error updating provider service:", error);
+    throw error;
+  }
+};
+
+export const resetPassword = async (email, oldPassword, newPassword) => {
+  try {
+    const authHeader = getAuthHeader();
+
+    const response = await fetch(`${BASE_URL}auth/reset-password`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...authHeader,
+        Accept: "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        email,
+        oldPassword,
+        newPassword,
+      }),
+    });
+
+    const data = await handleResponse(response);
+    return data.message || "Password updated successfully";
+  } catch (error) {
+    console.error("Password reset error:", error);
+    throw new Error(error.message || "Failed to reset password");
   }
 };

@@ -1,26 +1,25 @@
-// src/services/reviewApi.js
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:8081/api/feedback'; // Update with your backend URL
+const BASE_URL = 'http://localhost:8081/api/feedback'; // Adjust if your base URL differs
 
-// Fetch all reviews
-export const fetchReviews = async () => {
-    try {
-        const response = await axios.get(`${API_BASE_URL}/all`);
-        return response.data; // Expecting array of FeedbackDTO
-    } catch (error) {
-        console.error("Error fetching reviews:", error);
-        return [];
-    }
+// Fetch all feedback
+export const fetchFeedback = async () => {
+  try {
+    const response = await axios.get(`${BASE_URL}/all`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching feedback:", error);
+    return [];
+  }
 };
 
-// Submit a new review
-export const submitReview = async (reviewData) => {
-    try {
-        const response = await axios.post(`${API_BASE_URL}/save`, reviewData);
-        return response.data;
-    } catch (error) {
-        console.error("Error submitting review:", error);
-        throw error;
-    }
+// Submit a new feedback
+export const submitFeedback = async (feedbackData) => {
+  try {
+    const response = await axios.post(`${BASE_URL}/add`, feedbackData);
+    return response.data;
+  } catch (error) {
+    console.error("Error submitting feedback:", error);
+    throw error;
+  }
 };

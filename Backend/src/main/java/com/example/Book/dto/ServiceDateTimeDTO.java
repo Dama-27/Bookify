@@ -1,20 +1,44 @@
 package com.example.Book.dto;
 
-import com.example.Book.model.Services;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.time.LocalDateTime;
 
-@Data
+import com.example.Book.model.ServiceDateTime;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class ServiceDateTimeDTO {
-
     private Long serviceDateTimeId;
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
-    private Integer duration;
-    private String date;
+
+    private LocalDateTime workHoursStart;
+
+    private LocalDateTime workHoursEnd;
+
+    private String workingDays;
+
+    private Integer timePackages;
+
+
+    public ServiceDateTimeDTO(ServiceDateTime serviceDateTime) {
+        this.serviceDateTimeId = serviceDateTime.getServiceDateTimeId();
+        this.workHoursStart = serviceDateTime.getWorkHoursStart();
+        this.workHoursEnd = serviceDateTime.getWorkHoursEnd();
+        this.workingDays = serviceDateTime.getWorkingDays();
+        this.timePackages = serviceDateTime.getTimePackages();
+    }
+
+    public ServiceDateTimeDTO(Long serviceDateTimeId, LocalDateTime workHoursStart, LocalDateTime workHoursEnd, Integer timePackages, String workingDays) {
+        this.serviceDateTimeId = serviceDateTimeId;
+        this.workHoursStart = workHoursStart;
+        this.workHoursEnd = workHoursEnd;
+        this.timePackages = timePackages;
+        this.workingDays = workingDays;
+    }
+
 }

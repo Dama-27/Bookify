@@ -22,9 +22,4 @@ public class FeedbackController {
     public List<FeedbackDTO> getAllFeedback() {
         return feedbackService.getAllFeedback();
     }
-
-    @GetMapping("/consumer/{consumerId}")
-    public List<FeedbackDTO> getFeedbackByConsumer(@PathVariable Long consumerId) {
-        return feedbackService.getFeedbackByConsumer(consumerId);
-    }
 }

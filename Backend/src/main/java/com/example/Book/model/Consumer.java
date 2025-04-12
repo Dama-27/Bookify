@@ -23,7 +23,7 @@ import lombok.Setter;
 public class Consumer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long client_id;
+    private Long clientId;
 
     // Basic Information
     @Column(nullable = false)
@@ -77,7 +77,9 @@ public class Consumer {
     @jakarta.persistence.PreUpdate
     protected void onUpdate() {
         updatedAt = java.time.LocalDateTime.now();
+    }
+
     public Long getClientId() {
-        return client_id;
+        return clientId;
     }
 }

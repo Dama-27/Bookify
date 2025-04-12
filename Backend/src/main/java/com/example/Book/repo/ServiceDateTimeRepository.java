@@ -19,7 +19,7 @@ public interface ServiceDateTimeRepository extends JpaRepository<ServiceDateTime
             "FROM ServiceDateTime sdt " +
             "JOIN sdt.services srv " +
             "JOIN srv.provider sp " +
-            "WHERE sp.provider_id = :providerId")
+            "WHERE sp.providerId = :providerId")
     List<ServiceDateTimeDTO> findByProviderId(@Param("providerId") Long providerId);
 
     Optional<ServiceDateTime> findByServices(Services services);

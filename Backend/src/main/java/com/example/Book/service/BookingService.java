@@ -72,7 +72,7 @@ public class BookingService {
 
         // Create and return the provider DTO with services
         return new ServiceProviderDTO(
-                provider.getProvider_id(),
+                provider.getProviderId(),
                 provider.getUsername(),
                 provider.getEmail(),
                 provider.getAddress(),
@@ -80,7 +80,7 @@ public class BookingService {
                 provider.getExperience(),
                 provider.getIsActive(),
                 serviceDTOs,
-                provider.getProfileImage(),  // Add the image parameter
+                provider.getProfileImage(),
                 provider.getFirstName(),
                 provider.getLastName()
         );
@@ -117,7 +117,7 @@ public class BookingService {
 
         return new ScheduleDTO(
                 schedule.getScheduleId(),
-                provider.getProvider_id(),
+                provider.getProviderId(),
                 //consumer.getConsumerId(),
                 schedule.getDateTime()
         );

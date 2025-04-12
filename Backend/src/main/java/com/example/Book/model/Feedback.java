@@ -11,87 +11,55 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "feedback")
 public class Feedback {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long feedbackId;
 
-    // Link to the Consumer (client_id)
     @ManyToOne
-    @JoinColumn(name = "client_id", nullable = false) // Ensure column name matches database
+    @JoinColumn(name = "consumer_id")
     private Consumer consumer;
 
-    // Link to the Booking (booking_id)
     @ManyToOne
-    @JoinColumn(name = "booking_id", nullable = false) // Ensure column name matches database
-    private Booking booking;
+    @JoinColumn(name = "provider_id")
+    private ServiceProvider serviceProvider;
 
     @Column(columnDefinition = "TEXT")
     private String comments;
 
     private int rating;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date responseDate = new Date();
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 
-    public Feedback() {
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
     }
 
-    public Feedback(Consumer consumer, Booking booking, String comments, int rating) {
-        this.consumer = consumer;
-        this.booking = booking;
-        this.comments = comments;
-        this.rating = rating;
-        this.responseDate = new Date();
+    public Long getConsumerId() {
+        return consumer != null ? consumer.getClientId() : null;
     }
 
-    // Getters and Setters
-    public Long getFeedbackId() {
-        return feedbackId;
+    public Long getProviderId() {
+        return serviceProvider != null ? serviceProvider.getProviderId() : null;
     }
 
-    public void setFeedbackId(Long feedbackId) {
-        this.feedbackId = feedbackId;
+    public void setConsumerId(Long consumerId) {
+        if (consumer == null) {
+            consumer = new Consumer();
+        }
+        consumer.setClientId(consumerId);
     }
 
-    public Consumer getConsumer() {
-        return consumer;
-    }
-
-    public void setConsumer(Consumer consumer) {
-        this.consumer = consumer;
-    }
-
-    public Booking getBooking() {
-        return booking;
-    }
-
-    public void setBooking(Booking booking) {
-        this.booking = booking;
-    }
-
-    public String getComments() {
-        return comments;
-    }
-
-    public void setComments(String comments) {
-        this.comments = comments;
-    }
-
-    public int getRating() {
-        return rating;
-    }
-
-    public void setRating(int rating) {
-        this.rating = rating;
-    }
-
-    public Date getResponseDate() {
-        return responseDate;
-    }
-
-    public void setResponseDate(Date responseDate) {
-        this.responseDate = responseDate;
+    public void setProviderId(Long providerId) {
+        if (serviceProvider == null) {
+            serviceProvider = new ServiceProvider();
+        }
+        serviceProvider.setProviderId(providerId);
     }
 }

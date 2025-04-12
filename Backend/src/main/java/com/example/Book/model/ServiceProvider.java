@@ -13,7 +13,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-
 @CrossOrigin(origins = "http://localhost:3000")
 @Entity
 @Getter
@@ -24,7 +23,7 @@ import lombok.Setter;
 public class ServiceProvider {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long provider_id;
+    private Long providerId;
 
     private String username;
     private String email;

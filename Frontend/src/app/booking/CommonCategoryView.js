@@ -1,139 +1,214 @@
-import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { StarIcon, LocationMarkerIcon, ClockIcon, CurrencyDollarIcon } from '@heroicons/react/outline';
 
-const CommonCategoryView = () => {
+const CommonCategoryView = ({ category, title, description }) => {
   const [providers, setProviders] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 6;
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [filters, setFilters] = useState({
+    rating: '',
+    price: '',
+    location: '',
+    availability: ''
+  });
+  const navigate = useNavigate();
 
   useEffect(() => {
-    fetch("http://localhost:8081/api/booking/providers")
-      .then((response) => response.json())
-      .then((data) => {
-        const formattedProviders = data.map((provider) => ({
-          id: provider.provider_id || provider.providerId, // use either field if available
-          name: provider.username,
-          firstName: provider.firstName,
-          lastName: provider.lastName,
-          specialization:
-            provider.services?.length > 0
-              ? provider.services[0].specialization
-              : "No Service",
-          category:
-            provider.services?.length > 0
-              ? provider.services[0].category
-              : "No Category",
-          profileImage: provider.profileImage
-            ? provider.profileImage // full URL already provided
-            : "/images/default-avatar.png",
+    const fetchProviders = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get(`http://localhost:8081/api/providers/category/${category}`);
+        const providersData = response.data.map(provider => ({
+          ...provider,
+          rating: provider.rating || 0,
+          price: provider.services?.[0]?.price || 0,
+          location: provider.address || 'Not specified',
+          availability: provider.availability || 'Flexible'
         }));
-        setProviders(formattedProviders);
-      })
-      .catch((error) => console.error("Error fetching providers:", error));
-  }, []);
+        setProviders(providersData);
+      } catch (err) {
+        setError('Failed to fetch providers. Please try again later.');
+        console.error('Error fetching providers:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const totalPages = Math.ceil(providers.length / itemsPerPage);
-  const currentProviders = providers.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+    fetchProviders();
+  }, [category]);
 
-  const handleImageError = (e) => {
-    e.target.onerror = null;
-    e.target.src = "/images/default-avatar.png";
+  const handleFilterChange = (e) => {
+    const { name, value } = e.target;
+    setFilters(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
-  return (
-    <div className="bg-blue-50 rounded-3xl p-8">
-      <h3 className="text-2xl font-semibold mb-6">Common Services</h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {currentProviders.map((provider) => (
-          <div
-            key={provider.id}
-            className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow"
-          >
-            <div className="flex flex-col items-center">
-              {/* Profile Image Container */}
-              <div className="w-24 h-24 mb-4">
-                <img
-                  src={provider.profileImage}
-                  alt={`${provider.name}'s profile`}
-                  onError={handleImageError}
-                  className="w-full h-full rounded-full object-cover border-4 border-cyan-100"
-                />
-              </div>
+  const filteredProviders = providers.filter(provider => {
+    return (
+      (!filters.rating || provider.rating >= parseFloat(filters.rating)) &&
+      (!filters.price || provider.price <= parseFloat(filters.price)) &&
+      (!filters.location || provider.location.toLowerCase().includes(filters.location.toLowerCase())) &&
+      (!filters.availability || provider.availability.toLowerCase().includes(filters.availability.toLowerCase()))
+    );
+  });
 
-              {/* Provider Info */}
-              <div className="text-center mb-4">
-                <h4 className="text-xl font-semibold text-gray-800">
-                  {provider.firstName} {provider.lastName}
-                </h4>
-                <p className="text-cyan-500 font-medium">{provider.category}</p>
-                <p className="text-sm text-gray-500">
-                  {provider.specialization}
-                </p>
-              </div>
-
-              {/* Book Now Button */}
-              <Link
-                to={`/clientbookingpage?provider=${provider.id}`}
-                className="inline-flex items-center px-6 py-2 bg-cyan-400 text-white rounded-full hover:bg-cyan-500 transition-colors"
-              >
-                Book Now
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-4 w-4 ml-2"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M14 5l7 7m0 0l-7 7m7-7H3"
-                  />
-                </svg>
-              </Link>
-            </div>
-          </div>
-        ))}
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
       </div>
+    );
+  }
 
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex justify-center mt-8 gap-2">
-          {currentPage > 1 && (
-            <button
-              onClick={() => setCurrentPage(currentPage - 1)}
-              className="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              Previous
-            </button>
-          )}
-          {Array.from({ length: totalPages }, (_, index) => (
-            <button
-              key={index + 1}
-              onClick={() => setCurrentPage(index + 1)}
-              className={`px-4 py-2 rounded-lg transition-colors ${
-                currentPage === index + 1
-                  ? "bg-cyan-500 text-white"
-                  : "bg-white border border-gray-300 hover:bg-gray-50"
-              }`}
-            >
-              {index + 1}
-            </button>
-          ))}
-          {currentPage < totalPages && (
-            <button
-              onClick={() => setCurrentPage(currentPage + 1)}
-              className="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              Next
-            </button>
-          )}
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+          <strong className="font-bold">Error!</strong>
+          <span className="block sm:inline"> {error}</span>
         </div>
-      )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">{title}</h1>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">{description}</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div className="bg-white p-4 rounded-lg shadow">
+            <label className="block text-sm font-medium text-gray-700 mb-2">Rating</label>
+            <select
+              name="rating"
+              value={filters.rating}
+              onChange={handleFilterChange}
+              className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            >
+              <option value="">Any Rating</option>
+              <option value="4">4+ Stars</option>
+              <option value="3">3+ Stars</option>
+              <option value="2">2+ Stars</option>
+            </select>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow">
+            <label className="block text-sm font-medium text-gray-700 mb-2">Max Price</label>
+            <input
+              type="number"
+              name="price"
+              value={filters.price}
+              onChange={handleFilterChange}
+              placeholder="Max price"
+              className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            />
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow">
+            <label className="block text-sm font-medium text-gray-700 mb-2">Location</label>
+            <input
+              type="text"
+              name="location"
+              value={filters.location}
+              onChange={handleFilterChange}
+              placeholder="Enter location"
+              className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            />
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow">
+            <label className="block text-sm font-medium text-gray-700 mb-2">Availability</label>
+            <select
+              name="availability"
+              value={filters.availability}
+              onChange={handleFilterChange}
+              className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            >
+              <option value="">Any Time</option>
+              <option value="morning">Morning</option>
+              <option value="afternoon">Afternoon</option>
+              <option value="evening">Evening</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredProviders.map((provider) => (
+            <motion.div
+              key={provider.providerId}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300"
+            >
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center">
+                    <img
+                      src={provider.profileImage || '/default-avatar.png'}
+                      alt={provider.username}
+                      className="w-12 h-12 rounded-full object-cover"
+                    />
+                    <div className="ml-4">
+                      <h3 className="text-lg font-semibold text-gray-900">{provider.username}</h3>
+                      <div className="flex items-center">
+                        <StarIcon className="h-4 w-4 text-yellow-400" />
+                        <span className="ml-1 text-sm text-gray-600">{provider.rating.toFixed(1)}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-lg font-bold text-blue-600">${provider.price}</p>
+                    <p className="text-sm text-gray-500">per session</p>
+                  </div>
+                </div>
+
+                <div className="space-y-2 mb-4">
+                  <div className="flex items-center text-gray-600">
+                    <LocationMarkerIcon className="h-5 w-5 mr-2" />
+                    <span>{provider.location}</span>
+                  </div>
+                  <div className="flex items-center text-gray-600">
+                    <ClockIcon className="h-5 w-5 mr-2" />
+                    <span>{provider.availability}</span>
+                  </div>
+                </div>
+
+                <p className="text-gray-600 mb-4 line-clamp-2">
+                  {provider.bio || 'No description available'}
+                </p>
+
+                <div className="flex justify-between items-center">
+                  <button
+                    onClick={() => navigate(`/booking/${provider.providerId}`)}
+                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-300"
+                  >
+                    Book Now
+                  </button>
+                  <button
+                    onClick={() => navigate(`/provider/${provider.providerId}`)}
+                    className="text-blue-600 hover:text-blue-800 transition-colors duration-300"
+                  >
+                    View Profile
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        {filteredProviders.length === 0 && (
+          <div className="text-center py-12">
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">No providers found</h3>
+            <p className="text-gray-600">Try adjusting your filters to see more results</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

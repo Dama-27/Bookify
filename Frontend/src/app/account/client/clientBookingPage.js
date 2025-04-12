@@ -581,53 +581,40 @@ const ClientBookingPage = () => {
   // Handle booking submission
   const handleBookAppointment = async () => {
     if (!selectedDate || !selectedTimeSlot || !providerId || !clientId) {
-      //alert("Please select a date and time slot");
       return;
     }
 
     if (isSubmitting) {
-      return; // Prevent multiple submissions
+      return;
     }
 
     setIsSubmitting(true);
     try {
-      // Format date for API - extract time from the selectedTimeSlot
-      const formattedDate = selectedDate.toISOString().split("T")[0]; // YYYY-MM-DD format
-      const timeStart = selectedTimeSlot.time.split(" - ")[0]; // Extract start time
-      
-      // Format the datetime string in ISO format
+      // Format date for API
+      const formattedDate = selectedDate.toISOString().split("T")[0];
+      const timeStart = selectedTimeSlot.time.split(" - ")[0];
       const bookDateTime = `${formattedDate}T${timeStart}:00`;
 
-      // Use service_id from the serviceData
+      // Get service_id from the serviceData
       const serviceId = serviceData.serviceId;
 
       if (!serviceId) {
         throw new Error("Service ID not found for the selected provider");
       }
 
-      // Create booking data
+      // Create booking data according to database schema
       const bookingData = {
+        booking_date_time: bookDateTime,
+        status: true, // true for active booking
         client_id: parseInt(clientId),
-        service_id: parseInt(serviceId),
-        bookDateTime: bookDateTime
-      };
-
-      // Create schedule data
-      const scheduleData = {
-        provider_id: parseInt(providerId),
-        dateTime: bookDateTime  // Changed from bookDateTime to dateTime to match backend
+        service_id: parseInt(serviceId)
       };
 
       console.log("Sending booking data:", bookingData);
-      console.log("Sending schedule data:", scheduleData);
 
       // Send booking request
-      const bookingResponse = await axios.post("http://localhost:8081/api/booking/addBooking", bookingData);
+      const bookingResponse = await axios.post("http://localhost:8081/api/bookings", bookingData);
       console.log("Booking response:", bookingResponse.data);
-      
-      // Send schedule request
-      const scheduleResponse = await axios.post("http://localhost:8081/api/booking/addSchedule", scheduleData);
-      console.log("Schedule response:", scheduleResponse.data);
 
       // Show success message
       alert("Your appointment has been booked successfully!");
@@ -636,30 +623,34 @@ const ClientBookingPage = () => {
       setSelectedDate(null);
       setSelectedTimeSlot(null);
       
-      // Refresh provider details to update booked slots
-      const bookedDatetimeResponse = await axios.get(
-        `http://localhost:8081/api/booking/provider/${providerId}`
+      // Refresh booked slots
+      const bookedResponse = await axios.get(
+        `http://localhost:8081/api/bookings/provider/${providerId}`
       );
       
-      // Update booked slots
-      if (bookedDatetimeResponse.data && bookedDatetimeResponse.data.dateTime) {
-        const date = new Date(bookedDatetimeResponse.data.dateTime);
-        const formattedTime = formatTimeFromDateTime(bookedDatetimeResponse.data.dateTime);
-        const slotDuration = calculateSlotDuration(
-          serviceData.workHours.start, 
-          serviceData.workHours.end, 
-          serviceData.timePackages
-        );
+      // Update booked slots with new data
+      if (bookedResponse.data) {
+        const updatedBookedSlots = bookedResponse.data.map(booking => {
+          const date = new Date(booking.booking_date_time);
+          const formattedTime = formatTimeFromDateTime(booking.booking_date_time);
+          const slotDuration = calculateSlotDuration(
+            serviceData.workHours.start, 
+            serviceData.workHours.end, 
+            serviceData.timePackages
+          );
+          
+          const endTime = addMinutesToTime(formattedTime, slotDuration);
+          
+          return {
+            date: date.toISOString().split('T')[0],
+            startTime: formattedTime,
+            endTime: endTime,
+            time: `${formattedTime} - ${endTime}`,
+            booking_id: booking.booking_id
+          };
+        });
         
-        const endTime = addMinutesToTime(formattedTime, slotDuration);
-        
-        setBookedSlots([{
-          date: date.toISOString().split('T')[0],
-          startTime: formattedTime,
-          endTime: endTime,
-          time: `${formattedTime} - ${endTime}`,
-          scheduleId: bookedDatetimeResponse.data.scheduleId
-        }]);
+        setBookedSlots(updatedBookedSlots);
       }
       
     } catch (error) {

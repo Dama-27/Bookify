@@ -35,7 +35,7 @@ public class ServiceService {
                     .orElseThrow(() -> new RuntimeException("Service not found"));
             
             // Verify the service belongs to the provider
-            if (!existingService.getProvider().getProvider_id().equals(provider.getProvider_id())) {
+            if (!existingService.getProvider().getProviderId().equals(provider.getProviderId())) {
                 throw new RuntimeException("Service does not belong to this provider");
             }
 

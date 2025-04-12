@@ -34,7 +34,7 @@ public class UserService {
             throw new RuntimeException("Service Provider already exists!");
         }
         try {
-            provider.setPassword(bCryptPasswordEncoder.encode(provider.getPassword()));
+            provider.setPassword(passwordEncoder.encode(provider.getPassword()));
             serviceProviderRepository.save(provider);
             return "Service Provider registered successfully!";
         } catch (Exception e) {
@@ -49,7 +49,7 @@ public class UserService {
             throw new RuntimeException("Email already registered!");
         }
         try {
-            consumer.setPassword(bCryptPasswordEncoder.encode(consumer.getPassword()));
+            consumer.setPassword(passwordEncoder.encode(consumer.getPassword()));
             consumerRepository.save(consumer);
             return "Consumer registered successfully!";
         } catch (Exception e) {
@@ -68,11 +68,11 @@ public class UserService {
             Optional<Consumer> consumerOpt = consumerRepository.findByEmail(email);
             if (consumerOpt.isPresent()) {
                 Consumer consumer = consumerOpt.get();
-                if (bCryptPasswordEncoder.matches(password, consumer.getPassword())) {
+                if (passwordEncoder.matches(password, consumer.getPassword())) {
                     String token = jwtService.generateToken(email);
                     
                     Map<String, Object> userData = new HashMap<>();
-                    userData.put("id", consumer.getClient_id());
+                    userData.put("id", consumer.getClientId());
                     userData.put("email", consumer.getEmail());
                     userData.put("username", consumer.getUsername());
                     userData.put("phone", consumer.getPhone());
@@ -91,11 +91,11 @@ public class UserService {
             Optional<ServiceProvider> providerOpt = serviceProviderRepository.findByEmail(email);
             if (providerOpt.isPresent()) {
                 ServiceProvider provider = providerOpt.get();
-                if (bCryptPasswordEncoder.matches(password, provider.getPassword())) {
+                if (passwordEncoder.matches(password, provider.getPassword())) {
                     String token = jwtService.generateToken(email);
                     
                     Map<String, Object> userData = new HashMap<>();
-                    userData.put("id", provider.getProvider_id());
+                    userData.put("id", provider.getProviderId());
                     userData.put("email", provider.getEmail());
                     userData.put("username", provider.getUsername());
                     userData.put("firstName", provider.getFirstName());
@@ -137,19 +137,28 @@ public class UserService {
     }
 
     public String resetPassword(String email, String oldPassword, String newPassword) {
-        // Find service provider by email
-        ServiceProvider provider = serviceProviderRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Service provider not found"));
-
-        // Verify old password using BCrypt
-        if (!bCryptPasswordEncoder.matches(oldPassword, provider.getPassword())) {
-            throw new RuntimeException("Current password is incorrect");
+        // Try to find consumer first
+        Optional<Consumer> consumerOpt = consumerRepository.findByEmail(email);
+        if (consumerOpt.isPresent()) {
+            Consumer consumer = consumerOpt.get();
+            if (passwordEncoder.matches(oldPassword, consumer.getPassword())) {
+                consumer.setPassword(passwordEncoder.encode(newPassword));
+                consumerRepository.save(consumer);
+                return "Password reset successful";
+            }
         }
 
-        // Hash and update new password
-        provider.setPassword(bCryptPasswordEncoder.encode(newPassword));
-        serviceProviderRepository.save(provider);
+        // Try to find service provider
+        Optional<ServiceProvider> providerOpt = serviceProviderRepository.findByEmail(email);
+        if (providerOpt.isPresent()) {
+            ServiceProvider provider = providerOpt.get();
+            if (passwordEncoder.matches(oldPassword, provider.getPassword())) {
+                provider.setPassword(passwordEncoder.encode(newPassword));
+                serviceProviderRepository.save(provider);
+                return "Password reset successful";
+            }
+        }
 
-        return "Password updated successfully";
+        throw new RuntimeException("Invalid email or password");
     }
 }

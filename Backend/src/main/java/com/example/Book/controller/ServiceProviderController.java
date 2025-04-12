@@ -109,7 +109,7 @@ public class ServiceProviderController {
             }
 
             ServiceProvider provider = providerOpt.get();
-            System.out.println("Found provider with ID: " + provider.getProvider_id());
+            System.out.println("Found provider with ID: " + provider.getProviderId());
 
             // Update fields if they exist in the request
             try {

@@ -5,12 +5,7 @@ import "react-toastify/dist/ReactToastify.css";
 import image1 from "../../images/2149bcff-5c92-4ee7-841d-4e36de2f5770.png";
 import { FcGoogle } from "react-icons/fc";
 import { FaGithub, FaFacebook } from "react-icons/fa6";
-import {
-  loginUser,
-  loginWithGoogle,
-  loginWithGithub,
-  loginWithFacebook,
-} from "../../services/api";
+import { loginUser, loginWithGoogle, loginWithGithub, loginWithFacebook } from "../../services/api";
 import image2 from "../../images/Frame 1321314484.png";
 import RegisterForm from "../signUp/RegisterForm";
 
@@ -56,6 +51,8 @@ const LoginForm = ({ userType = "consumer", resetPassword = false }) => {
     // Here you would actually call an API to request password reset
     // For now, we'll just simulate it
     try {
+      // This would be your actual API call
+      // await requestPasswordReset(resetEmail, userType);
       console.log(`Password reset requested for ${resetEmail} (${userType})`);
       setSuccess(`Password reset instructions sent to ${resetEmail}`);
     } catch (error) {
@@ -107,31 +104,38 @@ const LoginForm = ({ userType = "consumer", resetPassword = false }) => {
 
       if (response.token) {
         localStorage.setItem("token", response.token);
-        localStorage.setItem(
-          "userRole",
-          response.role || userType === "consumer"
-            ? "CONSUMER"
-            : "SERVICE_PROVIDER"
-        );
+        const role = userType === "consumer" ? "CONSUMER" : "SERVICE_PROVIDER";
+        localStorage.setItem("userRole", role);
 
         if (response.user) {
           const userInfo = {
             ...response.user,
-            name: response.user.username,
-            client_id: response.user.id,
-            role: userType === "consumer" ? "consumers" : "service_providers",
+            role: role,
+            // Add database-specific fields
+            client_id: response.user.client_id || response.user.id,
+            username: response.user.username,
+            email: response.user.email,
+            profile_image: response.user.profile_image,
+            status: response.user.status
           };
           localStorage.setItem("userInfo", JSON.stringify(userInfo));
 
           if (response.user.id) {
-            localStorage.setItem("clientId", response.user.id); // Assuming `id` is the clientId
+            localStorage.setItem("clientId", response.user.id);
           }
         } else {
           localStorage.setItem("userInfo", JSON.stringify({}));
         }
 
         toast.success("Login successful!");
-        navigate(userType === "consumer" ? "/" : "/accountsettings");
+        // Navigate based on user type
+        if (role === "CONSUMER") {
+          console.log("Navigating to home page for consumer");
+          navigate("/");
+        } else {
+          console.log("Navigating to account settings for service provider");
+          navigate("/accountsettings");
+        }
       }
     } catch (error) {
       toast.error(`${provider} login failed: ${error.message}`);
@@ -154,7 +158,7 @@ const LoginForm = ({ userType = "consumer", resetPassword = false }) => {
       const loginData = {
         email: formData.email,
         password: formData.password,
-        role: userType === "consumer" ? "consumer" : "service-provider",
+        role: userType === "consumer" ? "CONSUMER" : "SERVICE_PROVIDER",
       };
 
       console.log("Attempting login with data:", loginData);
@@ -165,7 +169,7 @@ const LoginForm = ({ userType = "consumer", resetPassword = false }) => {
         localStorage.setItem("token", response.token);
 
         // Store user role
-        const role = userType === "consumer" ? "consumer" : "service-provider";
+        const role = userType === "consumer" ? "CONSUMER" : "SERVICE_PROVIDER";
         localStorage.setItem("userRole", role);
 
         // Store complete user data
@@ -173,19 +177,20 @@ const LoginForm = ({ userType = "consumer", resetPassword = false }) => {
           const userInfo = {
             ...response.user,
             role: role,
+            // Add database-specific fields
+            client_id: response.user.client_id || response.user.id,
+            username: response.user.username,
+            email: response.user.email,
+            profile_image: response.user.profile_image,
+            status: response.user.status
           };
           localStorage.setItem("userInfo", JSON.stringify(userInfo));
 
           // Store user ID in localStorage
           if (response.user.client_id) {
             localStorage.setItem("userId", response.user.client_id);
-            console.log(
-              "User ID stored in localStorage:",
-              response.user.client_id
-            );
           } else if (response.user.id) {
             localStorage.setItem("userId", response.user.id);
-            console.log("User ID stored in localStorage:", response.user.id);
           }
         }
 
@@ -193,24 +198,22 @@ const LoginForm = ({ userType = "consumer", resetPassword = false }) => {
 
         // Add a small delay before navigation to ensure localStorage is updated
         setTimeout(() => {
-          if (userType === "consumer") {
+          if (role === "CONSUMER") {
+            console.log("Navigating to home page for consumer");
             navigate("/");
           } else {
+            console.log("Navigating to account settings for service provider");
             navigate("/accountsettings");
           }
         }, 100);
-      } else if (response.error) {
-        toast.error(
-          response.error || "Login failed. Please check your credentials."
-        );
-        setError(
-          response.error || "Login failed. Please check your credentials."
-        );
+      } else {
+        toast.error(response.error || "Login failed. Please check your credentials.");
+        setError(response.error || "Login failed. Please check your credentials.");
       }
     } catch (error) {
       console.error("Login error:", error);
-      toast.error(error.message || "An error occurred during login");
-      setError(error.message || "An error occurred during login");
+      toast.error("Login failed. Please try again.");
+      setError("Login failed. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -331,7 +334,7 @@ const LoginForm = ({ userType = "consumer", resetPassword = false }) => {
               value={formData.email}
               onChange={handleChange}
               className={`w-full p-2 border rounded mt-2 ${
-                formErrors.email ? "border-red-500" : ""
+                formErrors.email ? 'border-red-500' : ''
               }`}
               required
             />
@@ -349,7 +352,7 @@ const LoginForm = ({ userType = "consumer", resetPassword = false }) => {
               value={formData.password}
               onChange={handleChange}
               className={`w-full p-2 border rounded mt-2 ${
-                formErrors.password ? "border-red-500" : ""
+                formErrors.password ? 'border-red-500' : ''
               }`}
               required
             />
@@ -382,7 +385,7 @@ const LoginForm = ({ userType = "consumer", resetPassword = false }) => {
             <div className="flex justify-center space-x-4 mt-3">
               <button
                 type="button"
-                onClick={() => handleOAuthLogin("google")}
+                onClick={() => handleOAuthLogin('google')}
                 disabled={isLoading}
                 className="p-2 bg-white border rounded-full shadow hover:bg-gray-100 disabled:opacity-50"
               >
@@ -390,7 +393,7 @@ const LoginForm = ({ userType = "consumer", resetPassword = false }) => {
               </button>
               <button
                 type="button"
-                onClick={() => handleOAuthLogin("github")}
+                onClick={() => handleOAuthLogin('github')}
                 disabled={isLoading}
                 className="p-2 bg-white border rounded-full shadow hover:bg-gray-100 disabled:opacity-50"
               >
@@ -398,7 +401,7 @@ const LoginForm = ({ userType = "consumer", resetPassword = false }) => {
               </button>
               <button
                 type="button"
-                onClick={() => handleOAuthLogin("facebook")}
+                onClick={() => handleOAuthLogin('facebook')}
                 disabled={isLoading}
                 className="p-2 bg-white border rounded-full shadow hover:bg-gray-100 disabled:opacity-50"
               >

@@ -17,6 +17,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.header.writers.XXssProtectionHeaderWriter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -35,14 +36,17 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .headers(headers -> headers
+                .xssProtection(xss -> xss.headerValue(XXssProtectionHeaderWriter.HeaderValue.ENABLED_MODE_BLOCK))
+                .contentSecurityPolicy(csp -> csp.policyDirectives("default-src 'self'"))
+            )
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/consumer/auth/**", "/auth/**").permitAll()
                 .requestMatchers("/api/auth/**", "/auth/**").permitAll()
                 .requestMatchers("/uploads/**", "/default-avatar.png").permitAll()
                 .requestMatchers("/api/booking/providers", "/api/booking/providers/**").permitAll()
                 .requestMatchers("/images/**").permitAll()
-                //.anyRequest().authenticated()
-                    .anyRequest().permitAll()
+                .anyRequest().authenticated()
             )
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)

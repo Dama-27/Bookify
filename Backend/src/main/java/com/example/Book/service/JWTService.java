@@ -77,11 +77,11 @@ public class JWTService {
             // Log the token for debugging (only first few characters)
             System.out.println("Validating token: " + token.substring(0, Math.min(token.length(), 10)) + "...");
             
-            return Jwts.parser()
-                    .verifyWith(getKey())
+            return Jwts.parserBuilder()
+                    .setSigningKey(getKey())
                     .build()
-                    .parseSignedClaims(token.trim())
-                    .getPayload();
+                    .parseClaimsJws(token)
+                    .getBody();
         } catch (Exception e) {
             System.out.println("Token validation error: " + e.getMessage());
             throw new IllegalArgumentException("Invalid token format: " + e.getMessage());

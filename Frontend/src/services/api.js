@@ -4,37 +4,14 @@ const API_BASE_URL = "http://localhost:8081/api/consumer";
 
 // Helper function to handle API responses
 const handleResponse = async (response) => {
-  const contentType = response.headers.get("content-type");
   if (!response.ok) {
-    const errorText = await response.text();
-    console.error("API Error Response:", {
-      status: response.status,
-      statusText: response.statusText,
-      body: errorText,
-      headers: Object.fromEntries(response.headers.entries()),
-    });
-    try {
-      const errorJson = JSON.parse(errorText);
-      throw new Error(errorJson.message || "An error occurred");
-    } catch (e) {
-      throw new Error(errorText || "An error occurred");
+    if (response.status === 401 || response.status === 403) {
+      return handleAuthError(new Error("Authentication failed"));
     }
+    const errorData = await response.json();
+    throw new Error(errorData.message || "An error occurred");
   }
-
-  if (contentType && contentType.includes("application/json")) {
-    try {
-      const jsonData = await response.json();
-      console.log("API Success Response:", jsonData);
-      return jsonData;
-    } catch (e) {
-      console.error("JSON Parse Error:", e);
-      return { success: true };
-    }
-  } else {
-    const textData = await response.text();
-    console.log("API Text Response:", textData);
-    return { success: true, data: textData };
-  }
+  return response.json();
 };
 
 // Helper function to handle network errors
@@ -76,7 +53,12 @@ const handleAuthError = (error) => {
 
   // Only redirect if we're not already on the login page
   if (!window.location.pathname.includes("/login")) {
-    window.location.href = "/service-provider/login";
+    const userRole = localStorage.getItem("userRole");
+    if (userRole === "SERVICE_PROVIDER") {
+      window.location.href = "/accountsettings";
+    } else {
+      window.location.href = "/";
+    }
   }
   throw new Error("Session expired. Please login again.");
 };
@@ -151,69 +133,41 @@ export const registercustomer = async (formData) => {
   }
 };
 
-// Login endpoints
-export const loginUser = async (formData) => {
+// Login function
+export const loginUser = async (loginData) => {
   try {
-    console.log("Login request URL:", `${API_BASE_URL}/auth/login`);
-    console.log("Login data:", formData);
-
-    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+    const response = await fetch(`${BASE_URL}/auth/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Accept: "application/json",
       },
-      credentials: "include",
-      body: JSON.stringify(formData),
+      body: JSON.stringify(loginData),
     });
 
-    // Log the response status and headers for debugging
-    console.log("Login response status:", response.status);
-    console.log(
-      "Login response headers:",
-      Object.fromEntries(response.headers.entries())
-    );
+    const data = await handleResponse(response);
 
-    // Check if the response is empty
-    const responseText = await response.text();
-    console.log("Login response text:", responseText);
-
-    if (!response.ok) {
-      try {
-        const errorData = JSON.parse(responseText);
-        throw new Error(errorData.error || "Login failed");
-      } catch (e) {
-        throw new Error(
-          `Login failed: ${response.status} ${response.statusText}`
-        );
-      }
-    }
-
-    // Parse the response text as JSON
-    let data;
-    try {
-      data = JSON.parse(responseText);
-    } catch (e) {
-      console.error("Error parsing login response:", e);
-      throw new Error("Invalid response from server");
-    }
-
-    console.log("Login response data:", data);
-
-    // Clean and store the token
     if (data.token) {
+      // Clean and store the token
       const token = data.token.replace("Bearer ", "").trim();
       localStorage.setItem("token", token);
-      console.log("Stored token in localStorage");
-    }
 
-    // Store user info
-    if (data.user) {
-      localStorage.setItem("userInfo", JSON.stringify(data.user));
-      console.log("Stored user info in localStorage");
-    }
+      // Store user info
+      if (data.user) {
+        const userInfo = {
+          ...data.user,
+          role: loginData.role,
+          client_id: data.user.client_id || data.user.id,
+          username: data.user.username,
+          email: data.user.email,
+          profile_image: data.user.profile_image,
+          status: data.user.status
+        };
+        localStorage.setItem("userInfo", JSON.stringify(userInfo));
+      }
 
-    return data;
+      return data;
+    }
+    throw new Error("Login failed");
   } catch (error) {
     console.error("Login error:", error);
     throw error;
@@ -390,151 +344,21 @@ export const fetchServiceProviderDetails = async (providerId) => {
   }
 };
 
-// Create a booking appointment
-export const createBooking = async (bookingData) => {
-  const token = localStorage.getItem("token");
-  if (!token) {
-    throw new Error("Authentication required");
-  }
-
-  try {
-    const response = await fetch(`${BASE_URL}api/bookings`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(bookingData),
-    });
-
-    if (!response.ok) {
-      throw new Error("Failed to create booking");
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error("Error creating booking:", error);
-    throw error;
-  }
-};
-
-// Update service provider profile
-export const updateServiceProviderProfile = async (profileData) => {
-  try {
-    const token = cleanToken(localStorage.getItem("token"));
-    console.log("Sending profile update with data:", profileData);
-
-    const response = await fetch(`${BASE_URL}api/service-providers/profile`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-        Accept: "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify(profileData),
-    });
-
-    console.log("Profile update response status:", response.status);
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Profile update error response:", errorText);
-
-      if (response.status === 401 || response.status === 403) {
-        return handleAuthError(new Error(errorText || "Authentication failed"));
-      }
-
-      try {
-        const errorJson = JSON.parse(errorText);
-        throw new Error(errorJson.message || errorText);
-      } catch (e) {
-        throw new Error(errorText || "Failed to update profile");
-      }
-    }
-
-    const updatedData = await response.json();
-    console.log("Profile update success response:", updatedData);
-
-    const userInfo = JSON.parse(localStorage.getItem("userInfo") || "{}");
-    const newUserInfo = {
-      ...userInfo,
-      ...updatedData,
-    };
-    console.log("Updating localStorage with:", newUserInfo);
-    localStorage.setItem("userInfo", JSON.stringify(newUserInfo));
-
-    return updatedData;
-  } catch (error) {
-    console.error("Error updating service provider profile:", error);
-    if (
-      error.message.includes("Authentication required") ||
-      error.message.includes("Session expired") ||
-      error.message.includes("Invalid token")
-    ) {
-      return handleAuthError(error);
-    }
-    throw error;
-  }
-};
-
-// Fetch user profile data
+// Fetch user profile
 export const fetchUserProfile = async () => {
-  const token = localStorage.getItem("token");
-  if (!token) {
-    console.error("No token found in localStorage");
-    throw new Error("Authentication required");
-  }
-
   try {
-    // Clean the token - remove any whitespace and ensure no 'Bearer ' prefix
-    const cleanToken = token.replace(/^Bearer\s+/i, "").trim();
-    console.log("Using cleaned token for authentication");
+    const token = localStorage.getItem("token");
+    if (!token) {
+      throw new Error("No token found");
+    }
 
-    const response = await fetch(`${BASE_URL}api/users/profile`, {
-      method: "GET",
+    const response = await fetch(`${BASE_URL}/api/users/profile`, {
       headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${cleanToken}`,
-        Accept: "application/json",
+        Authorization: `Bearer ${token}`,
       },
-      credentials: "include",
     });
 
-    console.log("Profile response status:", response.status);
-    console.log(
-      "Profile response headers:",
-      Object.fromEntries(response.headers.entries())
-    );
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Profile fetch error:", {
-        status: response.status,
-        statusText: response.statusText,
-        body: errorText,
-        headers: Object.fromEntries(response.headers.entries()),
-      });
-
-      if (response.status === 401 || response.status === 403) {
-        localStorage.removeItem("token");
-        localStorage.removeItem("userInfo");
-        throw new Error("Session expired. Please login again.");
-      }
-
-      throw new Error(
-        `Failed to fetch user profile (${response.status}): ${errorText}`
-      );
-    }
-
-    const data = await response.json();
-    console.log("Profile data received:", data);
-
-    if (data) {
-      localStorage.setItem("userInfo", JSON.stringify(data));
-    }
-
-    return data;
+    return handleResponse(response);
   } catch (error) {
     console.error("Error fetching user profile:", error);
     throw error;
@@ -543,63 +367,90 @@ export const fetchUserProfile = async () => {
 
 // Fetch service provider profile
 export const fetchServiceProviderProfile = async () => {
-  const token = localStorage.getItem("token");
-  if (!token) {
-    console.error("No token found in localStorage");
-    throw new Error("Authentication required");
-  }
-
   try {
-    // Clean the token - remove any whitespace and ensure no 'Bearer ' prefix
-    const cleanToken = token.replace(/^Bearer\s+/i, "").trim();
-    console.log("Using cleaned token for authentication");
+    const token = localStorage.getItem("token");
+    if (!token) {
+      throw new Error("No token found");
+    }
 
-    const response = await fetch(`${BASE_URL}api/service-providers/profile`, {
-      method: "GET",
+    const response = await fetch(`${BASE_URL}/api/service-providers/profile`, {
       headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${cleanToken}`,
-        Accept: "application/json",
+        Authorization: `Bearer ${token}`,
       },
-      credentials: "include",
     });
 
-    console.log("Profile response status:", response.status);
-    console.log(
-      "Profile response headers:",
-      Object.fromEntries(response.headers.entries())
-    );
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Profile fetch error:", {
-        status: response.status,
-        statusText: response.statusText,
-        body: errorText,
-        headers: Object.fromEntries(response.headers.entries()),
-      });
-
-      if (response.status === 401 || response.status === 403) {
-        localStorage.removeItem("token");
-        localStorage.removeItem("userInfo");
-        throw new Error("Session expired. Please login again.");
-      }
-
-      throw new Error(
-        `Failed to fetch profile (${response.status}): ${errorText}`
-      );
-    }
-
-    const data = await response.json();
-    console.log("Profile data received:", data);
-
-    if (data) {
-      localStorage.setItem("userInfo", JSON.stringify(data));
-    }
-
-    return data;
+    return handleResponse(response);
   } catch (error) {
     console.error("Error fetching service provider profile:", error);
+    throw error;
+  }
+};
+
+// Update service provider profile
+export const updateServiceProviderProfile = async (profileData) => {
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      throw new Error("No token found");
+    }
+
+    const response = await fetch(`${BASE_URL}/api/service-providers/profile`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(profileData),
+    });
+
+    return handleResponse(response);
+  } catch (error) {
+    console.error("Error updating service provider profile:", error);
+    throw error;
+  }
+};
+
+// Fetch services
+export const fetchServices = async () => {
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      throw new Error("No token found");
+    }
+
+    const response = await fetch(`${BASE_URL}/api/services`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return handleResponse(response);
+  } catch (error) {
+    console.error("Error fetching services:", error);
+    throw error;
+  }
+};
+
+// Create booking
+export const createBooking = async (bookingData) => {
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      throw new Error("No token found");
+    }
+
+    const response = await fetch(`${BASE_URL}/api/bookings`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(bookingData),
+    });
+
+    return handleResponse(response);
+  } catch (error) {
+    console.error("Error creating booking:", error);
     throw error;
   }
 };
